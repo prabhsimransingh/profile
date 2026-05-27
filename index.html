@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prabh Singh — Engineering Executive</title>
+  <meta name="description" content="Engineering executive building enterprise AI infrastructure, Kubernetes platforms, and cloud-native systems at Fortune 500 scale.">
+  <meta property="og:title" content="Prabh Singh — Engineering Executive">
+  <meta property="og:description" content="Engineering executive building enterprise AI infrastructure, Kubernetes platforms, and cloud-native systems at Fortune 500 scale.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#00f5d4">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══ Loader ══ -->
+<div id="loader">
+  <div class="loader__logo">PS</div>
+  <div class="loader__bar-wrap"><div class="loader__bar"></div></div>
+  <div class="loader__text">INITIALIZING SYSTEM...</div>
+</div>
+
+<!-- ══ Custom Cursor ══ -->
+<div class="cursor-dot" id="cur-dot"></div>
+<div class="cursor-ring" id="cur-ring"></div>
+
+<!-- ══ Scroll Progress ══ -->
+<div id="scroll-progress"></div>
+
+<!-- ══ Nav ══ -->
+<nav id="nav">
+  <a href="#hero" class="nav__logo">PS<span>.</span>dev</a>
+  <ul class="nav__links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#speaking">Speaking</a></li>
+    <li><a href="#publications">Pubs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="mailto:prabh_simran@hotmail.com" class="nav__cta">Hire Me</a>
+  <button class="nav__burger" id="burger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="nav__mobile" id="mobile-nav">
+  <a href="#about" class="mobile-link">About</a>
+  <a href="#skills" class="mobile-link">Skills</a>
+  <a href="#projects" class="mobile-link">Projects</a>
+  <a href="#speaking" class="mobile-link">Speaking</a>
+  <a href="#publications" class="mobile-link">Pubs</a>
+  <a href="#contact" class="mobile-link">Contact</a>
+</div>
+
+<!-- ══ Hero ══ -->
+<section id="hero">
+  <canvas id="three-canvas"></canvas>
+  <div class="hero__blobs">
+    <div class="hero__blob hero__blob--1"></div>
+    <div class="hero__blob hero__blob--2"></div>
+    <div class="hero__blob hero__blob--3"></div>
+  </div>
+
+  <div class="hero__content">
+    <div class="hero__badge">
+      <span class="hero__badge-dot"></span>
+      Fremont, CA · Open to opportunities
+    </div>
+
+    <h1 class="hero__name" id="hero-name">
+      <span class="hero__glitch" data-text="Prabh Singh">Prabh Singh</span>
+    </h1>
+
+    <div class="hero__sub">
+      Building <span class="hero__typed" id="hero-typed"></span>
+    </div>
+
+    <p class="hero__tagline">
+      Engineering executive. Kubernetes pioneer. Built platforms running $25B+ of Salesforce's ARR.
+    </p>
+
+    <div class="hero__ctas">
+      <a href="#projects" class="btn btn--primary">View Work ↓</a>
+      <a href="assets/resume.pdf" class="btn btn--ghost" target="_blank">Download CV</a>
+    </div>
+
+    <div class="hero__socials">
+      <a href="https://github.com/prabhsimransingh" target="_blank" aria-label="GitHub">⌥</a>
+      <a href="https://linkedin.com/in/prabhssingh" target="_blank" aria-label="LinkedIn">in</a>
+      <a href="mailto:prabh_simran@hotmail.com" aria-label="Email">@</a>
+    </div>
+  </div>
+
+  <div class="hero__scroll-hint">
+    <div class="hero__scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- ══ Impact Bar ══ -->
+<div id="impact">
+  <div class="container">
+    <div class="impact__inner">
+      <div class="impact__item"><div class="impact__val">$25B+</div><div class="impact__label">ARR Enabled</div></div>
+      <div class="impact__item"><div class="impact__val">1,800+</div><div class="impact__label">Services · 99.99% SLA</div></div>
+      <div class="impact__item"><div class="impact__val">$74B</div><div class="impact__label">Assets on Platform</div></div>
+      <div class="impact__item"><div class="impact__val">100+</div><div class="impact__label">Engineers Led</div></div>
+      <div class="impact__item"><div class="impact__val">3</div><div class="impact__label">Patents Filed</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ About ══ -->
+<section id="about" class="section">
+  <div class="container">
+    <p class="section-label reveal">About Me</p>
+    <div class="about__grid">
+      <div class="about__text">
+        <h2 class="section-heading reveal">Architect of platforms<br>that run at <span class="grad">Fortune 500 scale</span></h2>
+        <p class="about__bio reveal">
+          Senior engineering leader who built the Kubernetes platform underpinning <strong>$25B of Salesforce's annual recurring revenue</strong> — one of the largest cloud-native infrastructure projects in enterprise software history. Among the first engineers to run Kubernetes in Fortune 500 production (2015–16), when the industry consensus was it couldn't handle stateful workloads at scale.
+        </p>
+        <p class="about__bio reveal">
+          Currently driving AI data infrastructure at <strong>NetApp</strong>, building intelligent systems that eliminate brittle data pipelines across the enterprise. Dual Master's from <strong>Carnegie Mellon University</strong>.
+        </p>
+        <div class="about__stats reveal">
+          <div class="stat">
+            <div class="stat__row"><span class="stat__num" data-target="15">0</span><span class="stat__suffix">+</span></div>
+            <span class="stat__label">Years at scale</span>
+          </div>
+          <div class="stat">
+            <div class="stat__row"><span class="stat__num" data-target="1800">0</span><span class="stat__suffix">+</span></div>
+            <span class="stat__label">Services 99.99% SLA</span>
+          </div>
+          <div class="stat">
+            <div class="stat__row"><span class="stat__num" data-target="100">0</span><span class="stat__suffix">+</span></div>
+            <span class="stat__label">Engineers led</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="avatar-wrap reveal">
+        <div class="avatar-hud">
+          <div class="avatar-img-wrap">
+            <img src="assets/avatar.png" alt="Prabh Singh"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div class="avatar-monogram" style="display:none">PS</div>
+            <div class="avatar-scan"></div>
+          </div>
+          <div class="avatar-tags">
+            <span class="avatar-tag highlight">Kubernetes</span>
+            <span class="avatar-tag highlight">AI Infrastructure</span>
+            <span class="avatar-tag">Go · Python · TypeScript</span>
+            <span class="avatar-tag">AWS · GCP · Azure</span>
+          </div>
+          <div class="avatar-status">
+            <span class="status-dot"></span>
+            Available for senior roles
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Skills ══ -->
+<section id="skills" class="section">
+  <div class="container">
+    <p class="section-label reveal">Core Expertise</p>
+    <h2 class="section-heading reveal">Technical <span class="grad">Depth</span></h2>
+  </div>
+  <div class="marquee-wrap">
+    <div class="marquee-track" id="marquee">
+      <span class="skill-chip">☸ Kubernetes</span>
+      <span class="skill-chip">🐍 Python</span>
+      <span class="skill-chip">🐹 Go</span>
+      <span class="skill-chip">📘 TypeScript</span>
+      <span class="skill-chip">☁ AWS</span>
+      <span class="skill-chip">🔵 GCP</span>
+      <span class="skill-chip">🔷 Azure</span>
+      <span class="skill-chip">🐳 Docker</span>
+      <span class="skill-chip">🔁 CI/CD</span>
+      <span class="skill-chip">🧠 LLM Orchestration</span>
+      <span class="skill-chip">⚡ Apache Kafka</span>
+      <span class="skill-chip">🗄 PostgreSQL</span>
+      <span class="skill-chip">🔴 Redis</span>
+      <span class="skill-chip">📊 Prometheus</span>
+      <span class="skill-chip">🔍 Grafana</span>
+      <span class="skill-chip">🏗 Terraform</span>
+      <span class="skill-chip">🤖 AI Agents</span>
+      <span class="skill-chip">🧩 Microservices</span>
+      <span class="skill-chip">🔒 Zero Trust</span>
+      <span class="skill-chip">📡 Service Mesh</span>
+      <span class="skill-chip">☸ Kubernetes</span>
+      <span class="skill-chip">🐍 Python</span>
+      <span class="skill-chip">🐹 Go</span>
+      <span class="skill-chip">📘 TypeScript</span>
+      <span class="skill-chip">☁ AWS</span>
+      <span class="skill-chip">🔵 GCP</span>
+      <span class="skill-chip">🔷 Azure</span>
+      <span class="skill-chip">🐳 Docker</span>
+      <span class="skill-chip">🔁 CI/CD</span>
+      <span class="skill-chip">🧠 LLM Orchestration</span>
+      <span class="skill-chip">⚡ Apache Kafka</span>
+      <span class="skill-chip">🗄 PostgreSQL</span>
+      <span class="skill-chip">🔴 Redis</span>
+      <span class="skill-chip">📊 Prometheus</span>
+      <span class="skill-chip">🔍 Grafana</span>
+      <span class="skill-chip">🏗 Terraform</span>
+      <span class="skill-chip">🤖 AI Agents</span>
+      <span class="skill-chip">🧩 Microservices</span>
+      <span class="skill-chip">🔒 Zero Trust</span>
+      <span class="skill-chip">📡 Service Mesh</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Projects ══ -->
+<section id="projects" class="section">
+  <div class="container">
+    <p class="section-label reveal">Things Built</p>
+    <h2 class="section-heading reveal">Featured <span class="grad">Projects</span></h2>
+
+    <div class="filter-tabs reveal" id="filter-tabs">
+      <button class="filter-tab active" data-filter="all">All</button>
+      <button class="filter-tab" data-filter="python">Python</button>
+      <button class="filter-tab" data-filter="typescript">TypeScript</button>
+      <button class="filter-tab" data-filter="web">Web</button>
+      <button class="filter-tab" data-filter="ai">AI</button>
+    </div>
+
+    <div class="projects__grid" id="projects-grid">
+
+      <div class="project-card" data-tags="python ai">
+        <div class="project-card__top">
+          <span class="project-card__icon">🤖</span>
+          <span class="project-card__lang">Python · AI</span>
+        </div>
+        <div class="project-card__title">ApplyPilot</div>
+        <div class="project-card__desc">AI-powered job application pipeline — parses job descriptions, tailors resumes, generates cover letters, and auto-submits via Playwright.</div>
+        <div class="project-card__pills">
+          <span class="pill">Claude API</span><span class="pill">Playwright</span><span class="pill">FastAPI</span>
+        </div>
+        <a href="https://github.com/prabhsimransingh" target="_blank" class="project-card__link">GitHub ↗</a>
+      </div>
+
+      <div class="project-card" data-tags="python ai">
+        <div class="project-card__top">
+          <span class="project-card__icon">⚙️</span>
+          <span class="project-card__lang">Python · AI</span>
+        </div>
+        <div class="project-card__title">Job Apply Bot</div>
+        <div class="project-card__desc">Automates LinkedIn and Indeed applications end-to-end with Claude AI for smart form-filling and Playwright for browser automation.</div>
+        <div class="project-card__pills">
+          <span class="pill">Claude AI</span><span class="pill">Playwright</span><span class="pill">LinkedIn API</span>
+        </div>
+        <a href="https://github.com/prabhsimransingh" target="_blank" class="project-card__link">GitHub ↗</a>
+      </div>
+
+      <div class="project-card" data-tags="web js">
+        <div class="project-card__top">
+          <span class="project-card__icon">🏏</span>
+          <span class="project-card__lang">Web · JS</span>
+        </div>
+        <div class="project-card__title">CricManager</div>
+        <div class="project-card__desc">Full-stack cricket club management app — live scoring, player stats, match scheduling, and Instagram auto-poster for match highlights.</div>
+        <div class="project-card__pills">
+          <span class="pill">React</span><span class="pill">Node.js</span><span class="pill">PostgreSQL</span>
+        </div>
+        <a href="https://github.com/prabhsimransingh" target="_blank" class="project-card__link">GitHub ↗</a>
+      </div>
+
+      <div class="project-card" data-tags="typescript web">
+        <div class="project-card__top">
+          <span class="project-card__icon">💰</span>
+          <span class="project-card__lang">TypeScript</span>
+        </div>
+        <div class="project-card__title">Budget Tracker</div>
+        <div class="project-card__desc">Personal finance tracker with AI-powered categorization, monthly trend charts, and smart savings recommendations.</div>
+        <div class="project-card__pills">
+          <span class="pill">TypeScript</span><span class="pill">Next.js</span><span class="pill">Prisma</span>
+        </div>
+        <a href="https://github.com/prabhsimransingh" target="_blank" class="project-card__link">GitHub ↗</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ Experience ══ -->
+<section id="experience" class="section">
+  <div class="container">
+    <p class="section-label reveal">Career</p>
+    <h2 class="section-heading reveal">Work <span class="grad">Timeline</span></h2>
+
+    <div class="timeline reveal">
+
+      <div class="tl-item">
+        <div class="tl-card hud">
+          <div class="tl-period">2023 – Present</div>
+          <div class="tl-role">Senior Director · AI Data Infrastructure</div>
+          <div class="tl-company">NetApp — Fremont, CA</div>
+          <ul class="tl-bullets">
+            <li>Building AI-native data infrastructure eliminating brittle enterprise pipelines</li>
+            <li>Leading cross-functional teams shipping cloud-native storage and AI integrations</li>
+            <li>Driving open-source contributions across Kubernetes ecosystem</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-card hud">
+          <div class="tl-period">2015 – 2023</div>
+          <div class="tl-role">Principal Engineer → Senior Director</div>
+          <div class="tl-company">Salesforce — San Francisco, CA</div>
+          <ul class="tl-bullets">
+            <li>Architected Kubernetes platform powering $25B+ ARR across 1,800+ microservices</li>
+            <li>Among the first to run Kubernetes in Fortune 500 production at scale (2015–16)</li>
+            <li>Filed 3 patents in distributed systems and container orchestration</li>
+            <li>Led 100+ engineers across infrastructure, platform, and AI orgs</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-card hud">
+          <div class="tl-period">2013 – 2015</div>
+          <div class="tl-role">Master of Science — Information Systems</div>
+          <div class="tl-company">Carnegie Mellon University</div>
+          <ul class="tl-bullets">
+            <li>Dual MS: Information Systems + Business Intelligence</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ Speaking ══ -->
+<section id="speaking" class="section">
+  <div class="container">
+    <p class="section-label reveal">Public Speaking</p>
+    <h2 class="section-heading reveal">On <span class="grad">Stage</span></h2>
+
+    <div class="speaking__grid reveal">
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-3.jpg" alt="NVIDIA GTC 2025" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">NVIDIA GTC 2025</span>
+          <div class="speak-card__title">AI Infrastructure at Scale — Washington DC</div>
+          <div class="speak-card__meta">March 2025 · Washington, DC</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-5.jpg" alt="NetApp INSIGHT 2025" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">NetApp INSIGHT 2025</span>
+          <div class="speak-card__title">Intelligent Data Pipelines for the AI Era</div>
+          <div class="speak-card__meta">2025</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-6.jpg" alt="NetApp INSIGHT 2025" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">NetApp INSIGHT 2025</span>
+          <div class="speak-card__title">Cloud-Native Storage for AI Workloads</div>
+          <div class="speak-card__meta">2025</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-1.jpg" alt="KubeCon EU 2024" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">KubeCon EU 2024</span>
+          <div class="speak-card__title">Representing NetApp at KubeCon Europe — Paris</div>
+          <div class="speak-card__meta">March 2024 · Paris, France</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-4.jpg" alt="NetApp INSIGHT 2024" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">NetApp INSIGHT 2024</span>
+          <div class="speak-card__title">Synthetic Testing Framework for Cloud-Native Apps</div>
+          <div class="speak-card__meta">2024</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-7.jpg" alt="AWS Container RoundTable" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">AWS RoundTable</span>
+          <div class="speak-card__title">Container Strategy for Enterprise Kubernetes</div>
+          <div class="speak-card__meta">AWS Container RoundTable</div>
+        </div>
+      </div>
+
+      <div class="speak-card">
+        <img src="assets/speaking/speaking-2.jpg" alt="KubeCamp" class="speak-card__img"
+          onerror="this.style.display='none'">
+        <div class="speak-card__body">
+          <span class="speak-card__venue">Google KubeCamp</span>
+          <div class="speak-card__title">Kubernetes at Fortune 500 — Lessons from the Trenches</div>
+          <div class="speak-card__meta">Google KubeCamp</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="venue-badges reveal">
+      <span class="venue-badge">NVIDIA GTC 2025</span>
+      <span class="venue-badge">KubeCon 2025</span>
+      <span class="venue-badge">NetApp INSIGHT 2025</span>
+      <span class="venue-badge">KubeCon EU 2024</span>
+      <span class="venue-badge">NetApp INSIGHT 2024</span>
+      <span class="venue-badge">AWS re:Invent 2021–23</span>
+      <span class="venue-badge">AWS Container RoundTable</span>
+      <span class="venue-badge">Google KubeCamp</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Publications ══ -->
+<section id="publications" class="section">
+  <div class="container">
+    <p class="section-label reveal">Writing & Research</p>
+    <h2 class="section-heading reveal">Featured <span class="grad">Publications</span></h2>
+
+    <div class="pubs__featured reveal">
+
+      <a class="pub-featured" href="https://medium.com/intelligent-data-insights/stop-rebuilding-the-same-ai-data-pipeline-over-and-over-1402854206de" target="_blank">
+        <img src="assets/articles/medium-ai-pipeline.jpg" alt="Medium Article" class="pub-featured__img"
+          onerror="this.style.background='linear-gradient(135deg,rgba(0,245,212,0.1),rgba(124,58,237,0.1))';this.style.minHeight='100px';this.style.display='block'">
+        <div class="pub-featured__body">
+          <span class="pub-featured__tag">Medium · AI</span>
+          <div class="pub-featured__title">Stop Rebuilding the Same AI Data Pipeline Over and Over</div>
+          <span class="pub-featured__link">Read Article ↗</span>
+        </div>
+      </a>
+
+      <a class="pub-featured" href="https://community.netapp.com/t5/Tech-ONTAP-Blogs/Revolutionizing-Data-Guardrails-for-AI-Pipelines/ba-p/454757" target="_blank">
+        <img src="assets/articles/netapp-data-guardrails.jpg" alt="NetApp Blog" class="pub-featured__img"
+          onerror="this.style.background='linear-gradient(135deg,rgba(0,245,212,0.1),rgba(124,58,237,0.1))';this.style.minHeight='100px';this.style.display='block'">
+        <div class="pub-featured__body">
+          <span class="pub-featured__tag">NetApp · Data</span>
+          <div class="pub-featured__title">Revolutionizing Data Guardrails for AI Pipelines</div>
+          <span class="pub-featured__link">Read Article ↗</span>
+        </div>
+      </a>
+
+      <a class="pub-featured" href="https://tfir.io/synthetic-testing-framework" target="_blank">
+        <img src="assets/articles/tfir-synthetic-testing.jpg" alt="tFiR Article" class="pub-featured__img"
+          onerror="this.style.background='linear-gradient(135deg,rgba(0,245,212,0.1),rgba(124,58,237,0.1))';this.style.minHeight='100px';this.style.display='block'">
+        <div class="pub-featured__body">
+          <span class="pub-featured__tag">tFiR.io · Kubernetes</span>
+          <div class="pub-featured__title">Synthetic Testing Framework for Cloud-Native Applications</div>
+          <span class="pub-featured__link">Read Article ↗</span>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="pubs__list reveal">
+
+      <a class="pub-card" href="https://github.com/salesforce/kube-synthetic-scaler" target="_blank">
+        <span class="pub-card__icon">⚡</span>
+        <div class="pub-card__body">
+          <div class="pub-card__title">kube-synthetic-scaler</div>
+          <div class="pub-card__meta">Open Source · Salesforce GitHub · Kubernetes autoscaler</div>
+        </div>
+        <span class="pub-card__arrow">↗</span>
+      </a>
+
+      <a class="pub-card" href="https://vmblog.com" target="_blank">
+        <span class="pub-card__icon">📰</span>
+        <div class="pub-card__body">
+          <div class="pub-card__title">NetApp INSIGHT 2024 Interview — AI Data Infrastructure</div>
+          <div class="pub-card__meta">VMblog · 2024</div>
+        </div>
+        <span class="pub-card__arrow">↗</span>
+      </a>
+
+      <a class="pub-card" href="https://vmblog.com" target="_blank">
+        <span class="pub-card__icon">📰</span>
+        <div class="pub-card__body">
+          <div class="pub-card__title">NetApp INSIGHT 2025 Predictions — Cloud & AI</div>
+          <div class="pub-card__meta">VMblog · 2025</div>
+        </div>
+        <span class="pub-card__arrow">↗</span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ Awards ══ -->
+<section id="awards" class="section">
+  <div class="container">
+    <p class="section-label reveal">Recognition</p>
+    <h2 class="section-heading reveal">Awards &amp; <span class="grad">Certifications</span></h2>
+
+    <div class="awards__grid reveal">
+
+      <div class="award-card">
+        <div class="award-card__img">
+          <img src="assets/awards/scrummaster-cert-enhanced.jpg" alt="Certified ScrumMaster"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="award-card__body">
+          <div class="award-card__tag">📜 Salesforce Certified · 2019</div>
+          <div class="award-card__title">Certified ScrumMaster</div>
+        </div>
+      </div>
+
+      <div class="award-card">
+        <div class="award-card__img">
+          <img src="assets/awards/tech-talkie-2021-clean.png" alt="FY21 Best Tech Talk"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="award-card__body">
+          <div class="award-card__tag">🏆 Salesforce · FY21</div>
+          <div class="award-card__title">Best Tech Talk Series</div>
+        </div>
+      </div>
+
+      <div class="award-card">
+        <div class="award-card__img">
+          <img src="assets/awards/salesforce-3yr-clean.png" alt="Salesforce 3-Year"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="award-card__body">
+          <div class="award-card__tag">🎖 Salesforce · 2022</div>
+          <div class="award-card__title">3-Year Anniversary Award</div>
+        </div>
+      </div>
+
+      <div class="award-card">
+        <div class="award-card__img" style="background:linear-gradient(135deg,rgba(0,245,212,0.08),rgba(124,58,237,0.08))">
+          <img src="assets/awards/salesforce-5yr-enhanced.jpg" alt="Salesforce 5-Year"
+            onerror="this.style.display='none'">
+        </div>
+        <div class="award-card__body">
+          <div class="award-card__tag">🎖 Salesforce · 2024</div>
+          <div class="award-card__title">5-Year Anniversary Award</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ Contact ══ -->
+<section id="contact" class="section">
+  <div class="container">
+    <p class="section-label reveal" style="justify-content:center">Contact</p>
+    <h2 class="section-heading reveal" style="text-align:center">Let's <span class="grad">Connect</span></h2>
+    <p class="reveal" style="text-align:center;color:var(--text-dim);max-width:480px;margin:0 auto 2rem;font-size:0.95rem">
+      Open to senior engineering leadership roles, advisory opportunities, and speaking engagements.
+    </p>
+
+    <div class="contact__strip hud reveal">
+      <div class="contact-strip__item">
+        <span class="cc-icon">✉️</span>
+        <span class="cc-label">Email</span>
+        <span class="cc-val" id="contact-email">prabh_simran@hotmail.com</span>
+        <button class="cc-copy" id="copy-email" title="Copy email">⧉</button>
+      </div>
+      <div class="contact-strip__divider"></div>
+      <div class="contact-strip__item">
+        <span class="cc-icon">📍</span>
+        <span class="cc-label">Location</span>
+        <span class="cc-val">Fremont, California</span>
+        <span class="cc-badge">Open to remote</span>
+      </div>
+    </div>
+
+    <div class="contact__socials reveal">
+      <a href="https://linkedin.com/in/prabhssingh" target="_blank" class="social-btn">in LinkedIn</a>
+      <a href="https://github.com/prabhsimransingh" target="_blank" class="social-btn">⌥ GitHub</a>
+      <a href="https://medium.com/@prabhsingh" target="_blank" class="social-btn">✍ Medium</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ Footer ══ -->
+<footer>
+  <div class="container">
+    Built by <a href="https://github.com/prabhsimransingh">Prabh Singh</a> ·
+    <span class="footer__geo">Fremont, CA</span> · 2025 ·
+    <a href="https://github.com/prabhsimransingh/profile" target="_blank">View Source</a>
+  </div>
+</footer>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.1.0/typed.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

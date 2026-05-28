@@ -470,22 +470,24 @@
         sections.forEach((s, i) => {
           const delta    = smoothScroll - i;
           const absDelta = Math.abs(delta);
-          // Opacity: fully visible at 0, gone by ±1
-          const op  = Math.max(0, 1 - absDelta * 1.4);
-          // Vertical: past cards rise up, upcoming cards wait below
-          const ty  = delta * -110;
-          // Screw spin: positive delta (past) spins left, negative (upcoming) right
-          const ry  = delta * -42;
-          // Slight tilt toward/away from camera for depth
-          const rx  = delta * 8;
-          // Depth: non-active cards push back in Z
-          const tz  = -(absDelta * absDelta) * 55;
-          // Subtle scale
-          const scl = Math.max(0.78, 1 - absDelta * 0.11);
+          // Sharp opacity peak: fully visible only near delta=0,
+          // gone by delta=±0.55 so only ONE card is ever prominent.
+          // Use squared dropoff for a clean bell curve peak.
+          const op  = Math.max(0, 1 - Math.pow(absDelta * 1.9, 2));
+          // Vertical rise: past cards float upward, upcoming wait below
+          const ty  = delta * -130;
+          // Screw spin around Y — 48° per section gives clear helical feel
+          const ry  = delta * -48;
+          // Slight X tilt for depth (receding cards tip away)
+          const rx  = delta * 9;
+          // Z depth: recede quadratically so it looks like depth, not just blur
+          const tz  = -(absDelta * absDelta) * 70;
+          // Scale down as they recede
+          const scl = Math.max(0.72, 1 - absDelta * 0.14);
 
           s.style.opacity   = op;
           s.style.transform = `translateY(${ty}px) translateZ(${tz}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${scl})`;
-          s.style.pointerEvents = absDelta < 0.45 ? 'auto' : 'none';
+          s.style.pointerEvents = absDelta < 0.4 ? 'auto' : 'none';
         });
       }
 

@@ -118,9 +118,10 @@ function initScene() {
   // CSS3D Renderer (for HTML cards)
   css3dRenderer = new CSS3DRenderer();
   css3dRenderer.setSize(window.innerWidth, window.innerHeight);
-  css3dRenderer.domElement.style.position = 'absolute';
+  css3dRenderer.domElement.style.position = 'fixed';
   css3dRenderer.domElement.style.top = '0';
-  css3dRenderer.domElement.style.pointerEvents = 'none';
+  css3dRenderer.domElement.style.left = '0';
+  css3dRenderer.domElement.style.zIndex = '1';
   document.body.appendChild(css3dRenderer.domElement);
 
   // Add cards to CSS3D space
@@ -187,31 +188,37 @@ function createParticles() {
 
 function setupCards() {
   const cardEls = document.querySelectorAll('.card');
-  const cardSpacing = 1000;
+  const cardSpacing = 1200;
 
   cardEls.forEach((el, i) => {
-    const css3dObj = new CSS3DObject(el);
+    // Clone to avoid issues with visibility
+    const clone = el.cloneNode(true);
+    clone.style.visibility = 'visible';
+    clone.style.pointerEvents = 'all';
+
+    const css3dObj = new CSS3DObject(clone);
     css3dObj.position.set(0, 0, -i * cardSpacing);
     css3dObj.rotation.x = 0;
     css3dObj.rotation.y = 0;
+    css3dObj.scale.set(1, 1, 1);
 
     scene.add(css3dObj);
     cardObjects.push({
-      element: el,
+      element: clone,
       object: css3dObj,
       index: i,
       targetRotation: { x: 0, y: 0 },
       currentRotation: { x: 0, y: 0 }
     });
 
-    el.addEventListener('mouseenter', () => {
+    clone.addEventListener('mouseenter', () => {
       State.hoveredCard = i;
-      el.style.zIndex = 10;
+      clone.style.zIndex = 10;
     });
 
-    el.addEventListener('mouseleave', () => {
+    clone.addEventListener('mouseleave', () => {
       State.hoveredCard = null;
-      el.style.zIndex = 0;
+      clone.style.zIndex = 0;
     });
   });
 }
@@ -340,7 +347,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await boot();
   initScene();
 
-  // Set scroll height (number of cards * card spacing)
+  // Set scroll height (number of cards * card spacing + extra for ending)
   const cardCount = document.querySelectorAll('.card').length;
-  document.body.style.height = (cardCount * 1000) + 'px';
+  document.body.style.height = (cardCount * 1200 + 2000) + 'px';
 });

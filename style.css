@@ -23,8 +23,15 @@ html, body {
   background: var(--black);
   color: var(--text);
   font-family: 'Space Grotesk', sans-serif;
-  overflow: hidden;
+  overflow-y: scroll;
+  overflow-x: hidden;
   cursor: none;
+}
+
+#content {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 canvas { display: block; }
@@ -176,6 +183,8 @@ canvas { display: block; }
   user-select: none;
   will-change: transform;
   transition: box-shadow 0.3s;
+  visibility: visible;
+  pointer-events: all;
 }
 
 .card:hover {

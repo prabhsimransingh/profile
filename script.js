@@ -181,9 +181,10 @@
   threeRender = initThree();
 
   function animate() {
-    // Lerp cylinder rotation
+    // Lerp cylinder rotation + vertical scroll (helix: one card-height per 45°)
     currentAngle += (targetAngle - currentAngle) * 0.08;
-    cylinder.style.transform = `rotateY(${currentAngle}deg)`;
+    const liftY = -currentAngle * (350 / 45);   // as cylinder rotates down, lift cards up
+    cylinder.style.transform = `rotateY(${currentAngle}deg) translateY(${liftY}px)`;
 
     // Section detection
     const sec = Math.min(CARD_COUNT - 1, Math.max(0,

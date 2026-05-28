@@ -224,7 +224,8 @@ body {
   position: absolute;
   width: 0; height: 0;
   transform-style: preserve-3d;
-  transform: rotateY(calc(var(--deg, 0) * 1deg)) translateZ(560px);
+  /* translateY first: moves pivot to card's height; rotateY + translateZ place it on the helix */
+  transform: translateY(calc(var(--y-idx, 0) * -350px)) rotateY(calc(var(--deg, 0) * 1deg)) translateZ(460px);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -234,6 +235,8 @@ body {
   position: absolute;
   width: 520px;
   left: -260px;
+  max-height: 330px;
+  overflow-y: auto;
   transform: translateY(-50%);
   background: var(--glass);
   border-radius: 22px;
@@ -430,7 +433,7 @@ button#copy.copied { border-color: var(--magenta); color: var(--magenta); }
 @media (max-width: 700px) {
   .cyl-card { width: 88vw; left: -44vw; }
   #stage { perspective: 900px; }
-  .cyl-slot { transform: rotateY(calc(var(--deg, 0) * 1deg)) translateZ(380px); }
+  .cyl-slot { transform: translateY(calc(var(--y-idx, 0) * -350px)) rotateY(calc(var(--deg, 0) * 1deg)) translateZ(320px); }
   .dot-nav { display: none; }
   .hud__tr, .hud__br { display: none; }
 }

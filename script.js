@@ -238,29 +238,29 @@
     // ── Chrome torus ──────────────────────────────────────────────────
     const torusGeo = new THREE.TorusGeometry(9, 2.4, 128, 256);
     const torusMat = new THREE.MeshPhongMaterial({
-      color:     new THREE.Color(0x061828),
-      emissive:  new THREE.Color(0x010810),
-      specular:  new THREE.Color(0xffffff),
-      shininess: 1200,
-      side:      THREE.DoubleSide,
+      color:       new THREE.Color(0x061828),
+      emissive:    new THREE.Color(0x010810),
+      specular:    new THREE.Color(0xffffff),
+      shininess:   1200,
+      side:        THREE.DoubleSide,
+      transparent: true,
+      opacity:     1,
     });
     const torus = new THREE.Mesh(torusGeo, torusMat);
 
-    // Glow halos
-    [[2.8, 0.06, 0x003388],[3.8, 0.025, 0x002266],[5.5, 0.008, 0x001144]].forEach(([tube,op,col]) =>
-      torus.add(new THREE.Mesh(
-        new THREE.TorusGeometry(9, tube, 32, 64),
-        new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:op,
-          blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide })
-      ))
-    );
+    // Glow halos — store base opacity on userData for scroll-driven fade
+    [[2.8, 0.06, 0x003388],[3.8, 0.025, 0x002266],[5.5, 0.008, 0x001144]].forEach(([tube,op,col]) => {
+      const mat = new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:op,
+        blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide });
+      mat.userData.baseOp = op;
+      torus.add(new THREE.Mesh(new THREE.TorusGeometry(9, tube, 32, 64), mat));
+    });
 
     // Inner portal disc
-    torus.add(new THREE.Mesh(
-      new THREE.CircleGeometry(6.5, 64),
-      new THREE.MeshBasicMaterial({ color:0x002255, transparent:true, opacity:0.25,
-        blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide })
-    ));
+    const discMat = new THREE.MeshBasicMaterial({ color:0x002255, transparent:true, opacity:0.25,
+      blending:THREE.AdditiveBlending, depthWrite:false, side:THREE.DoubleSide });
+    discMat.userData.baseOp = 0.25;
+    torus.add(new THREE.Mesh(new THREE.CircleGeometry(6.5, 64), discMat));
 
     const torusGroup = new THREE.Group();
     torusGroup.add(torus);
@@ -268,21 +268,21 @@
     scene.add(torusGroup);
 
     // ── Vertical light pillar ─────────────────────────────────────────
-    const pillar = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.06, 0.06, 80, 8),
-      new THREE.MeshBasicMaterial({ color:0x00d4ff, transparent:true, opacity:0.18,
-        blending:THREE.AdditiveBlending, depthWrite:false })
-    );
+    const pillarMat = new THREE.MeshBasicMaterial({ color:0x00d4ff, transparent:true, opacity:0.18,
+      blending:THREE.AdditiveBlending, depthWrite:false });
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 80, 8), pillarMat);
     pillar.position.set(0,0,0);
     scene.add(pillar);
 
     // Equator rings
+    const eqMeshes = [];
     const eqGeo = new THREE.TorusGeometry(0.15, 0.06, 8, 32);
-    const eqMat = new THREE.MeshBasicMaterial({ color:0x00ffff, transparent:true, opacity:0.5,
-      blending:THREE.AdditiveBlending, depthWrite:false });
     [9, -9].forEach(y => {
-      const eq = new THREE.Mesh(eqGeo, eqMat.clone());
+      const mat = new THREE.MeshBasicMaterial({ color:0x00ffff, transparent:true, opacity:0.5,
+        blending:THREE.AdditiveBlending, depthWrite:false });
+      const eq = new THREE.Mesh(eqGeo, mat);
       eq.rotation.x = Math.PI/2; eq.position.y = y;
+      eqMeshes.push(eq);
       scene.add(eq);
     });
 
@@ -402,6 +402,21 @@
           flashLight.intensity = 0;
         }
       }
+
+      // ── Torus scroll-driven fade: visible at section 0, gone by section 1 ──
+      // scrollProgress=0 → opacity 1, scrollProgress=1 → opacity 0
+      const torusVis = introComplete ? Math.max(0, 1 - scrollProgress) : 1;
+      torusMat.opacity = torusVis;
+      torus.children.forEach(child => {
+        if (child.material && child.material.userData.baseOp !== undefined) {
+          child.material.opacity = child.material.userData.baseOp * torusVis;
+        }
+      });
+      pillarMat.opacity  = 0.18 * torusVis;
+      eqMeshes.forEach(m => { m.material.opacity = 0.5 * torusVis; });
+      torusGroup.visible = torusVis > 0.01;
+      pillar.visible     = torusVis > 0.01;
+      eqMeshes.forEach(m => { m.visible = torusVis > 0.01; });
 
       // ── Torus rotation from scroll ─────────────────────────────────
       _currentRotY += (_targetRotY - _currentRotY) * 0.06;

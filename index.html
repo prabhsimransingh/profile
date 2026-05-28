@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prabh Singh — Cyberspace</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>Prabh Singh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -22,39 +22,32 @@
 })();
 </script>
 
-<!-- Three.js WebGL particle canvas -->
+<!-- Three.js WebGL canvas — full screen, behind everything -->
 <canvas id="bg-canvas"></canvas>
-
-<!-- Atmospheric background orbs -->
-<div class="bg-orbs">
-  <div class="orb orb--1"></div>
-  <div class="orb orb--2"></div>
-  <div class="orb orb--3"></div>
-  <div class="orb orb--4"></div>
-</div>
-<div class="grain"></div>
-<div class="scanlines"></div>
 
 <!-- Boot Screen -->
 <div id="boot" class="boot">
   <div class="boot__inner">
     <div class="boot__logo">PS</div>
     <div class="boot__text">PRABH.OS v3.0</div>
-    <div class="boot__sub">INITIALIZING SECURE TERMINAL...</div>
-    <div class="boot__progress"><div class="boot__bar"></div></div>
+    <div class="boot__bar-wrap"><div class="boot__bar"></div></div>
   </div>
 </div>
 
-<!-- HUD -->
-<div class="hud">
-  <div class="hud__tl"><span class="hud__dot"></span>ONLINE</div>
-  <div class="hud__tr"><span id="section-counter">01 / 08</span></div>
-  <div class="hud__bl"><span id="zone">IDENTITY</span></div>
-  <div class="hud__br">PRABH.OS v3.0</div>
-</div>
-
+<!-- Scroll progress line -->
 <div class="scroll-progress"><div id="progress-bar"></div></div>
 
+<!-- Top-left nav label -->
+<div class="nav-label">
+  <span class="nav-label__dot"></span>
+  <span id="zone">IDENTITY</span>
+  <span class="nav-label__count" id="section-counter">01 / 08</span>
+</div>
+
+<!-- Top-right brand -->
+<div class="brand">PRABH.OS</div>
+
+<!-- Right-side dot navigation -->
 <nav class="dot-nav">
   <button class="dot active" data-idx="0" title="Identity"></button>
   <button class="dot" data-idx="1" title="Profile"></button>
@@ -66,296 +59,205 @@
   <button class="dot" data-idx="7" title="Interface"></button>
 </nav>
 
-<!-- Fixed 3D Stage — cylinder rotates as user scrolls -->
-<div id="stage">
+<!-- Left content panel — sections fade in/out -->
+<div id="content-panel">
 
-  <!-- Central glowing pipe (the axis) -->
-  <div class="pipe"></div>
+  <!-- 01: IDENTITY -->
+  <div class="sec active" data-idx="0">
+    <div class="sec__label">01 — IDENTITY</div>
+    <h1 class="sec__title">PRABH<br>SINGH</h1>
+    <p class="sec__sub">Engineering Executive · Kubernetes Pioneer</p>
+    <p class="sec__body">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
+    <div class="stat-row">
+      <div class="stat"><span class="stat__val">15+</span><span class="stat__lbl">Years</span></div>
+      <div class="stat"><span class="stat__val">100+</span><span class="stat__lbl">Engineers</span></div>
+      <div class="stat"><span class="stat__val">3</span><span class="stat__lbl">Patents</span></div>
+      <div class="stat"><span class="stat__val">$25B+</span><span class="stat__lbl">ARR Built</span></div>
+    </div>
+  </div>
 
-  <!-- Rotating cylinder: 8 cards at 45° intervals -->
-  <div id="cylinder">
+  <!-- 02: PROFILE -->
+  <div class="sec" data-idx="1">
+    <div class="sec__label">02 — PROFILE</div>
+    <h1 class="sec__title">SYSTEM<br>OPERATOR</h1>
+    <p class="sec__body">Among the first to run Kubernetes in Fortune 500 production (2015–16). Platform supporting 1,800+ services at 99.99% SLA with $74B in assets under management.</p>
+    <div class="stat-row">
+      <div class="stat"><span class="stat__val">1,800+</span><span class="stat__lbl">Services @ 99.99%</span></div>
+      <div class="stat"><span class="stat__val">$74B</span><span class="stat__lbl">Assets on Platform</span></div>
+      <div class="stat"><span class="stat__val">8 yrs</span><span class="stat__lbl">@ Salesforce</span></div>
+      <div class="stat"><span class="stat__val">2015</span><span class="stat__lbl">K8s Pioneer</span></div>
+    </div>
+  </div>
 
-    <!-- 01: IDENTITY — 0° -->
-    <div class="cyl-slot" data-idx="0" data-zone="IDENTITY" style="--deg:0;--y-idx:0">
-      <div class="cyl-card">
-        <div class="cyl-card__border"></div>
-        <div class="cyl-card__glow"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ IDENTITY ]</div>
-          <div class="hero-layout">
-            <div class="hero-avatar">
-              <div class="avatar-frame">
-                <img src="assets/avatar.jpg" alt="Prabh Singh" class="avatar-img"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-                <div class="avatar-fallback" style="display:none">PS</div>
-                <div class="avatar-ring avatar-ring--1"></div>
-                <div class="avatar-ring avatar-ring--2"></div>
-              </div>
-            </div>
-            <div class="hero-text">
-              <h1>PRABH<br>SINGH</h1>
-              <p class="subtitle">Engineering Executive<br>Kubernetes Pioneer</p>
-            </div>
-          </div>
-          <p class="body-text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
-          <div class="meta-row">
-            <div class="meta-badge"><span class="meta-val">15+</span><span class="meta-lbl">Years</span></div>
-            <div class="meta-badge"><span class="meta-val">100+</span><span class="meta-lbl">Engineers</span></div>
-            <div class="meta-badge"><span class="meta-val">3</span><span class="meta-lbl">Patents</span></div>
-            <div class="meta-badge"><span class="meta-val">$25B+</span><span class="meta-lbl">ARR</span></div>
-          </div>
+  <!-- 03: CAPABILITIES -->
+  <div class="sec" data-idx="2">
+    <div class="sec__label">03 — CAPABILITIES</div>
+    <h1 class="sec__title">TECHNICAL<br>DEPTH</h1>
+    <div class="skill-list">
+      <div class="skill-group">
+        <div class="skill-group__label">INFRASTRUCTURE</div>
+        <div class="chips"><span>Kubernetes</span><span>Terraform</span><span>Service Mesh</span><span>Zero Trust</span></div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group__label">LANGUAGES</div>
+        <div class="chips"><span>Python</span><span>Go</span><span>TypeScript</span><span>Bash</span></div>
+      </div>
+      <div class="skill-group">
+        <div class="skill-group__label">CLOUD & AI</div>
+        <div class="chips"><span>AWS</span><span>GCP</span><span>LLM Infra</span><span>MLOps</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 04: ARCHIVE -->
+  <div class="sec" data-idx="3">
+    <div class="sec__label">04 — ARCHIVE</div>
+    <h1 class="sec__title">FEATURED<br>PROJECTS</h1>
+    <div class="project-list">
+      <div class="project-item">
+        <span class="project-item__tag">AI</span>
+        <span class="project-item__name">ApplyPilot</span>
+        <span class="project-item__desc">AI-powered job application pipeline with Claude AI</span>
+      </div>
+      <div class="project-item">
+        <span class="project-item__tag">BOT</span>
+        <span class="project-item__name">Job Apply Bot</span>
+        <span class="project-item__desc">LinkedIn + Indeed automation via Playwright</span>
+      </div>
+      <div class="project-item">
+        <span class="project-item__tag">WEB</span>
+        <span class="project-item__name">CricManager</span>
+        <span class="project-item__desc">Full-stack cricket club management platform</span>
+      </div>
+      <div class="project-item">
+        <span class="project-item__tag">FINANCE</span>
+        <span class="project-item__name">Budget Tracker</span>
+        <span class="project-item__desc">AI-powered personal finance OS</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 05: TIMELINE -->
+  <div class="sec" data-idx="4">
+    <div class="sec__label">05 — TIMELINE</div>
+    <h1 class="sec__title">CAREER<br>LOG</h1>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-item__meta">2023 — NOW · NetApp</div>
+        <div class="tl-item__role">Senior Director · AI Data Infrastructure</div>
+        <div class="tl-item__desc">Leading AI infrastructure strategy for next-gen data platforms.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-item__meta">2015 — 2023 · Salesforce</div>
+        <div class="tl-item__role">Principal Engineer → Senior Director</div>
+        <div class="tl-item__desc">8-year journey IC to executive. Built K8s platform running $25B+ ARR.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-item__meta">2013 — 2015 · Carnegie Mellon</div>
+        <div class="tl-item__role">MS Information Systems</div>
+        <div class="tl-item__desc">Dual degree. Distributed systems & enterprise architecture.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 06: TRANSMISSIONS -->
+  <div class="sec" data-idx="5">
+    <div class="sec__label">06 — TRANSMISSIONS</div>
+    <h1 class="sec__title">SPEAKING<br>EVENTS</h1>
+    <div class="speaking-list">
+      <div class="speaking-item">
+        <img src="assets/speaking/nvidia-gtc-2025.jpg" alt="NVIDIA GTC 2025" onerror="this.style.display='none'">
+        <div class="speaking-item__info">
+          <div class="speaking-item__event">NVIDIA GTC 2025</div>
+          <div class="speaking-item__topic">AI Infrastructure at Scale</div>
+        </div>
+      </div>
+      <div class="speaking-item">
+        <img src="assets/speaking/kubecon-eu-2024.jpg" alt="KubeCon EU 2024" onerror="this.style.display='none'">
+        <div class="speaking-item__info">
+          <div class="speaking-item__event">KubeCon EU 2024</div>
+          <div class="speaking-item__topic">Production K8s at Fortune 500</div>
+        </div>
+      </div>
+      <div class="speaking-item">
+        <img src="assets/speaking/netapp-insight-2024.jpg" alt="NetApp INSIGHT" onerror="this.style.display='none'">
+        <div class="speaking-item__info">
+          <div class="speaking-item__event">NetApp INSIGHT 2024</div>
+          <div class="speaking-item__topic">AI Data Infrastructure</div>
+        </div>
+      </div>
+      <div class="speaking-item">
+        <img src="assets/speaking/salesforce-container-roundtable.jpg" alt="Salesforce" onerror="this.style.display='none'">
+        <div class="speaking-item__info">
+          <div class="speaking-item__event">Salesforce Roundtable</div>
+          <div class="speaking-item__topic">Container Infrastructure</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- 02: PROFILE — 45° -->
-    <div class="cyl-slot" data-idx="1" data-zone="PROFILE" style="--deg:45;--y-idx:1">
-      <div class="cyl-card">
-        <div class="cyl-card__border"></div>
-        <div class="cyl-card__glow"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ PROFILE ]</div>
-          <h2>SYSTEM OPERATOR</h2>
-          <p class="body-text">Among the first to run Kubernetes in Fortune 500 production <strong>(2015–16)</strong>. Platform supporting 1,800+ services at 99.99% SLA with $74B in assets.</p>
-          <div class="stat-grid">
-            <div class="stat-card"><span class="stat-val">1,800+</span><span class="stat-lbl">Services @ 99.99%</span></div>
-            <div class="stat-card"><span class="stat-val">$74B</span><span class="stat-lbl">Assets on Platform</span></div>
-            <div class="stat-card"><span class="stat-val">8 yrs</span><span class="stat-lbl">@ Salesforce</span></div>
-            <div class="stat-card"><span class="stat-val">2015</span><span class="stat-lbl">K8s Pioneer</span></div>
-          </div>
+  <!-- 07: CREDENTIALS -->
+  <div class="sec" data-idx="6">
+    <div class="sec__label">07 — CREDENTIALS</div>
+    <h1 class="sec__title">AWARDS &amp;<br>CERTS</h1>
+    <div class="awards-list">
+      <div class="award-item">
+        <img src="assets/awards/salesforce-5yr.jpg" alt="5yr Award" onerror="this.style.display='none'">
+        <div>
+          <div class="award-item__year">2024</div>
+          <div class="award-item__name">Salesforce 5-Year Impact Award</div>
+        </div>
+      </div>
+      <div class="award-item">
+        <img src="assets/awards/salesforce-3yr-clean.png" alt="3yr Award" onerror="this.style.display='none'">
+        <div>
+          <div class="award-item__year">2022</div>
+          <div class="award-item__name">Salesforce 3-Year Excellence</div>
+        </div>
+      </div>
+      <div class="award-item">
+        <img src="assets/awards/tech-talkie-2021-clean.png" alt="Tech Talk" onerror="this.style.display='none'">
+        <div>
+          <div class="award-item__year">FY21</div>
+          <div class="award-item__name">Best Tech Talk of the Year</div>
+        </div>
+      </div>
+      <div class="award-item">
+        <img src="assets/awards/scrummaster-cert-enhanced.jpg" alt="CSM" onerror="this.style.display='none'">
+        <div>
+          <div class="award-item__year">2019</div>
+          <div class="award-item__name">Certified ScrumMaster (CSM)</div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- 03: CAPABILITIES — 90° -->
-    <div class="cyl-slot" data-idx="2" data-zone="CAPABILITIES" style="--deg:90;--y-idx:2">
-      <div class="cyl-card">
-        <div class="cyl-card__border cyl-card__border--magenta"></div>
-        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ CAPABILITIES ]</div>
-          <h2>TECHNICAL DEPTH</h2>
-          <div class="skill-grid">
-            <div class="skill-group">
-              <div class="skill-group__label">INFRASTRUCTURE</div>
-              <div class="chips"><span>Kubernetes</span><span>Terraform</span><span>Service Mesh</span><span>Zero Trust</span></div>
-            </div>
-            <div class="skill-group">
-              <div class="skill-group__label">LANGUAGES</div>
-              <div class="chips"><span>Python</span><span>Go</span><span>TypeScript</span><span>Bash</span></div>
-            </div>
-            <div class="skill-group">
-              <div class="skill-group__label">CLOUD & OPS</div>
-              <div class="chips"><span>AWS</span><span>GCP</span><span>CI/CD</span><span>Microservices</span></div>
-            </div>
-            <div class="skill-group">
-              <div class="skill-group__label">AI / MODERN</div>
-              <div class="chips"><span>AI Agents</span><span>LLM Infra</span><span>DataOps</span><span>MLOps</span></div>
-            </div>
-          </div>
-        </div>
+  <!-- 08: INTERFACE -->
+  <div class="sec" data-idx="7">
+    <div class="sec__label">08 — INTERFACE</div>
+    <h1 class="sec__title">ESTABLISH<br>CHANNEL</h1>
+    <p class="sec__body">Open to <strong>senior engineering leadership</strong>, advisory roles, and speaking engagements.</p>
+    <div class="contact-list">
+      <div class="contact-item">
+        <span class="contact-item__lbl">EMAIL</span>
+        <span class="contact-item__val">prabh_simran@hotmail.com</span>
+        <button id="copy">[COPY]</button>
+      </div>
+      <div class="contact-item">
+        <span class="contact-item__lbl">LOCATION</span>
+        <span class="contact-item__val">Fremont, CA · Remote OK</span>
       </div>
     </div>
-
-    <!-- 04: ARCHIVE — 135° -->
-    <div class="cyl-slot" data-idx="3" data-zone="ARCHIVE" style="--deg:135;--y-idx:3">
-      <div class="cyl-card">
-        <div class="cyl-card__border"></div>
-        <div class="cyl-card__glow"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ ARCHIVE ]</div>
-          <h2>FEATURED PROJECTS</h2>
-          <div class="project-grid">
-            <div class="project-card">
-              <div class="project-card__tag">AI</div>
-              <div class="project-card__name">ApplyPilot</div>
-              <div class="project-card__desc">AI-powered job application pipeline with Claude AI orchestration</div>
-            </div>
-            <div class="project-card">
-              <div class="project-card__tag">BOT</div>
-              <div class="project-card__name">Job Apply Bot</div>
-              <div class="project-card__desc">LinkedIn + Indeed automation using Playwright and AI</div>
-            </div>
-            <div class="project-card">
-              <div class="project-card__tag">WEB</div>
-              <div class="project-card__name">CricManager</div>
-              <div class="project-card__desc">Full-stack cricket club management platform</div>
-            </div>
-            <div class="project-card">
-              <div class="project-card__tag">FINANCE</div>
-              <div class="project-card__name">Budget Tracker</div>
-              <div class="project-card__desc">AI-powered personal finance OS</div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="social-row">
+      <a href="https://linkedin.com/in/prabhssingh" target="_blank">LinkedIn ↗</a>
+      <a href="https://github.com/prabhsimransingh" target="_blank">GitHub ↗</a>
+      <a href="https://medium.com/@prabhsingh" target="_blank">Medium ↗</a>
     </div>
+  </div>
 
-    <!-- 05: TIMELINE — 180° -->
-    <div class="cyl-slot" data-idx="4" data-zone="TIMELINE" style="--deg:180;--y-idx:4">
-      <div class="cyl-card">
-        <div class="cyl-card__border cyl-card__border--magenta"></div>
-        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ TIMELINE ]</div>
-          <h2>CAREER LOG</h2>
-          <div class="timeline">
-            <div class="tl-item">
-              <div class="tl-item__year">2023 — NOW</div>
-              <div class="tl-item__company">NetApp</div>
-              <div class="tl-item__role">Senior Director · AI Data Infrastructure</div>
-              <div class="tl-item__desc">Leading AI infrastructure strategy and engineering teams for next-generation data platforms.</div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-item__year">2015 — 2023</div>
-              <div class="tl-item__company">Salesforce</div>
-              <div class="tl-item__role">Principal Engineer → Senior Director</div>
-              <div class="tl-item__desc">8-year journey from IC to executive. Built the K8s platform running $25B+ ARR.</div>
-            </div>
-            <div class="tl-item">
-              <div class="tl-item__year">2013 — 2015</div>
-              <div class="tl-item__company">Carnegie Mellon</div>
-              <div class="tl-item__role">MS Information Systems</div>
-              <div class="tl-item__desc">Dual degree. Focus on distributed systems and enterprise architecture.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+</div><!-- /#content-panel -->
 
-    <!-- 06: TRANSMISSIONS — 225° -->
-    <div class="cyl-slot" data-idx="5" data-zone="TRANSMISSIONS" style="--deg:225;--y-idx:5">
-      <div class="cyl-card">
-        <div class="cyl-card__border"></div>
-        <div class="cyl-card__glow"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ TRANSMISSIONS ]</div>
-          <h2>SPEAKING</h2>
-          <div class="speaking-grid">
-            <div class="speaking-card">
-              <div class="speaking-card__img-wrap">
-                <img src="assets/speaking/nvidia-gtc-2025.jpg" alt="NVIDIA GTC 2025"
-                     onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
-              </div>
-              <div class="speaking-card__info">
-                <div class="speaking-card__event">NVIDIA GTC 2025</div>
-                <div class="speaking-card__topic">AI Infrastructure at Scale</div>
-              </div>
-            </div>
-            <div class="speaking-card">
-              <div class="speaking-card__img-wrap">
-                <img src="assets/speaking/kubecon-eu-2024.jpg" alt="KubeCon EU 2024"
-                     onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
-              </div>
-              <div class="speaking-card__info">
-                <div class="speaking-card__event">KubeCon EU 2024</div>
-                <div class="speaking-card__topic">Production K8s at Fortune 500</div>
-              </div>
-            </div>
-            <div class="speaking-card">
-              <div class="speaking-card__img-wrap">
-                <img src="assets/speaking/netapp-insight-2024.jpg" alt="NetApp INSIGHT"
-                     onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
-              </div>
-              <div class="speaking-card__info">
-                <div class="speaking-card__event">NetApp INSIGHT</div>
-                <div class="speaking-card__topic">AI Data Infrastructure</div>
-              </div>
-            </div>
-            <div class="speaking-card">
-              <div class="speaking-card__img-wrap">
-                <img src="assets/speaking/salesforce-container-roundtable.jpg" alt="Salesforce Roundtable"
-                     onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
-              </div>
-              <div class="speaking-card__info">
-                <div class="speaking-card__event">Salesforce Roundtable</div>
-                <div class="speaking-card__topic">Container Infrastructure</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 07: CREDENTIALS — 270° -->
-    <div class="cyl-slot" data-idx="6" data-zone="CREDENTIALS" style="--deg:270;--y-idx:6">
-      <div class="cyl-card">
-        <div class="cyl-card__border cyl-card__border--gold"></div>
-        <div class="cyl-card__glow cyl-card__glow--gold"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ CREDENTIALS ]</div>
-          <h2>AWARDS</h2>
-          <div class="awards-grid">
-            <div class="award-card">
-              <div class="award-card__img-wrap">
-                <img src="assets/awards/salesforce-5yr.jpg" alt="Salesforce 5yr"
-                     onerror="this.parentElement.classList.add('no-img')">
-              </div>
-              <div class="award-card__year">2024</div>
-              <div class="award-card__name">Salesforce 5-Year Impact Award</div>
-            </div>
-            <div class="award-card">
-              <div class="award-card__img-wrap">
-                <img src="assets/awards/salesforce-3yr-clean.png" alt="Salesforce 3yr"
-                     onerror="this.parentElement.classList.add('no-img')">
-              </div>
-              <div class="award-card__year">2022</div>
-              <div class="award-card__name">Salesforce 3-Year Excellence</div>
-            </div>
-            <div class="award-card">
-              <div class="award-card__img-wrap">
-                <img src="assets/awards/tech-talkie-2021-clean.png" alt="Best Tech Talk"
-                     onerror="this.parentElement.classList.add('no-img')">
-              </div>
-              <div class="award-card__year">FY21</div>
-              <div class="award-card__name">Best Tech Talk of the Year</div>
-            </div>
-            <div class="award-card">
-              <div class="award-card__img-wrap">
-                <img src="assets/awards/scrummaster-cert-enhanced.jpg" alt="ScrumMaster"
-                     onerror="this.parentElement.classList.add('no-img')">
-              </div>
-              <div class="award-card__year">2019</div>
-              <div class="award-card__name">Certified ScrumMaster (CSM)</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 08: INTERFACE — 315° -->
-    <div class="cyl-slot" data-idx="7" data-zone="INTERFACE" style="--deg:315;--y-idx:7">
-      <div class="cyl-card">
-        <div class="cyl-card__border cyl-card__border--magenta"></div>
-        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
-        <div class="cyl-card__inner">
-          <div class="label">[ INTERFACE ]</div>
-          <h2>ESTABLISH CHANNEL</h2>
-          <p class="body-text">Open to <strong>senior engineering leadership</strong>, advisory roles, and speaking engagements.</p>
-          <div class="contact-grid">
-            <div class="contact-row">
-              <span class="contact-row__lbl">EMAIL</span>
-              <span class="contact-row__val">prabh_simran@hotmail.com</span>
-              <button id="copy">[COPY]</button>
-            </div>
-            <div class="contact-row">
-              <span class="contact-row__lbl">LOCATION</span>
-              <span class="contact-row__val">Fremont, CA · Remote OK</span>
-            </div>
-          </div>
-          <div class="social-links">
-            <a href="https://linkedin.com/in/prabhssingh" target="_blank" class="social-btn">LinkedIn ↗</a>
-            <a href="https://github.com/prabhsimransingh" target="_blank" class="social-btn">GitHub ↗</a>
-            <a href="https://medium.com/@prabhsingh" target="_blank" class="social-btn">Medium ↗</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /#cylinder -->
-</div><!-- /#stage -->
-
-<!-- Scroll spacer: 7 transitions × 100vh for 8 cards -->
+<!-- Scroll spacer: 7 transitions × 100vh -->
 <div class="scroll-spacer"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

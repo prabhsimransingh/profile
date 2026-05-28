@@ -501,9 +501,10 @@
           // Y-rotation: card face tracks the orbit so it stays readable while turning
           const ry = angle * (180 / Math.PI);
 
-          // Opacity follows cosine of orbit angle:
-          // angle=0 → fully visible, angle=90° → invisible (edge-on)
-          const op = Math.max(0, Math.cos(angle));
+          // Opacity: clamp by DELTA distance (not orbit angle) so sections
+          // that complete a full orbit never reappear at the front position.
+          // Visible only within ±1 section of active — gone completely at ±1.
+          const op = Math.max(0, 1 - Math.abs(delta) * 1.25);
 
           s.style.opacity       = op;
           s.style.transform     = `perspective(1100px) translateX(${tx}px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateY(${ry}deg)`;

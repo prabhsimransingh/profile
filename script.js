@@ -1,226 +1,231 @@
 // ============================================================================
-// BABYLON.JS IMMERSIVE SCI-FI EXPERIENCE
+// PRABH.OS — script.js
+// Babylon.js atmospheric background + IntersectionObserver card reveals
 // ============================================================================
 
-const canvas = document.getElementById('renderCanvas');
-const engine = new BABYLON.Engine(canvas, true);
+(function () {
+  'use strict';
 
-// Create scene
-const scene = new BABYLON.Scene(engine);
-scene.clearColor = new BABYLON.Color3(0, 0, 0);
-scene.collisionsEnabled = true;
+  // ── Babylon.js 3D background scene ───────────────────────────────────────
 
-// Camera - will be controlled by scroll
-const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, 30));
-camera.attachControl(canvas, true);
-camera.angularSensibility = 1000;
-camera.inertia = 0.7;
+  const canvas = document.getElementById('renderCanvas');
+  let engine, scene;
 
-// Lighting
-const ambientLight = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), scene);
-ambientLight.intensity = 0.3;
-ambientLight.diffuse = new BABYLON.Color3(0, 0.4, 0.6);
+  function initBabylon() {
+    if (typeof BABYLON === 'undefined') return;
 
-const pointLight1 = new BABYLON.PointLight('light1', new BABYLON.Vector3(20, 20, 20), scene);
-pointLight1.intensity = 0.4;
-pointLight1.range = 100;
-pointLight1.diffuse = new BABYLON.Color3(0, 1, 1);
+    engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true });
+    scene = new BABYLON.Scene(engine);
+    scene.clearColor = new BABYLON.Color4(0, 0, 0.03, 1);
 
-const pointLight2 = new BABYLON.PointLight('light2', new BABYLON.Vector3(-20, -20, 20), scene);
-pointLight2.intensity = 0.4;
-pointLight2.range = 100;
-pointLight2.diffuse = new BABYLON.Color3(1, 0, 1);
+    // Camera — fixed, slight tilt, no user control on scroll
+    const camera = new BABYLON.ArcRotateCamera('cam',
+      -Math.PI / 2, Math.PI / 3, 80, BABYLON.Vector3.Zero(), scene);
 
-// ============================================================================
-// PARTICLE SYSTEM - VOLUMETRIC DUST/ENERGY
-// ============================================================================
+    // Ambient
+    const ambient = new BABYLON.HemisphericLight('amb',
+      new BABYLON.Vector3(0, 1, 0), scene);
+    ambient.intensity = 0.15;
+    ambient.diffuse = new BABYLON.Color3(0.1, 0.4, 0.6);
 
-function createParticleSystem() {
-  const particleSystem = new BABYLON.ParticleSystem('particles', 2000, scene);
+    // Dynamic neon point lights
+    const lightC = new BABYLON.PointLight('lc',
+      new BABYLON.Vector3(30, 20, 20), scene);
+    lightC.diffuse = new BABYLON.Color3(0, 1, 1);
+    lightC.intensity = 0.6;
+    lightC.range = 120;
 
-  particleSystem.particleTexture = new BABYLON.DynamicTexture('particleTexture', 64);
-  const ctx = particleSystem.particleTexture.getContext();
-  ctx.fillStyle = 'white';
-  ctx.beginPath();
-  ctx.arc(32, 32, 32, 0, Math.PI * 2);
-  ctx.fill();
-  particleSystem.particleTexture.update();
+    const lightM = new BABYLON.PointLight('lm',
+      new BABYLON.Vector3(-30, -20, 20), scene);
+    lightM.diffuse = new BABYLON.Color3(1, 0, 1);
+    lightM.intensity = 0.5;
+    lightM.range = 120;
 
-  const emitter = BABYLON.MeshBuilder.CreateSphere('emitter', { diameter: 50 }, scene);
-  emitter.isVisible = false;
-  particleSystem.emitter = emitter;
+    // Wireframe floating shapes
+    const shapes = [];
+    const shapeData = [
+      { type: 'ico',  size: 8,  pos: [28, 12, -15],  speed: 0.4,  col: [0, 1, 1] },
+      { type: 'oct',  size: 10, pos: [-25, -10, -20], speed: 0.3,  col: [1, 0, 1] },
+      { type: 'ico',  size: 5,  pos: [0, 28, -25],   speed: 0.6,  col: [1, 0.85, 0] },
+      { type: 'oct',  size: 6,  pos: [-18, 20, -10],  speed: 0.25, col: [0, 1, 1] },
+      { type: 'ico',  size: 4,  pos: [20, -20, -18],  speed: 0.5,  col: [1, 0, 1] },
+    ];
 
-  particleSystem.minEmitBox = new BABYLON.Vector3(-30, -30, -30);
-  particleSystem.maxEmitBox = new BABYLON.Vector3(30, 30, 30);
+    shapeData.forEach(d => {
+      const mat = new BABYLON.StandardMaterial('m', scene);
+      mat.emissiveColor = new BABYLON.Color3(...d.col);
+      mat.wireframe = true;
 
-  particleSystem.minEmitPower = 0.5;
-  particleSystem.maxEmitPower = 2;
-  particleSystem.minLifeTime = 2;
-  particleSystem.maxLifeTime = 4;
+      const mesh = d.type === 'ico'
+        ? BABYLON.MeshBuilder.CreateIcoSphere('s', { radius: d.size, subdivisions: 2 }, scene)
+        : BABYLON.MeshBuilder.CreatePolyhedron('s', { type: 3, size: d.size }, scene);
 
-  particleSystem.minSize = 0.2;
-  particleSystem.maxSize = 1;
-  particleSystem.minScaleFunction = (start, end) => 0.8;
-  particleSystem.maxScaleFunction = (start, end) => 1.2;
+      mesh.position = new BABYLON.Vector3(...d.pos);
+      mesh.material = mat;
+      mesh.isPickable = false;
+      shapes.push({ mesh, ...d, t: Math.random() * Math.PI * 2 });
+    });
 
-  particleSystem.emitRate = 100;
-  particleSystem.gravity = new BABYLON.Vector3(0, 0.1, 0);
-  particleSystem.minAngularSpeed = -Math.PI;
-  particleSystem.maxAngularSpeed = Math.PI;
+    // Particle system — volumetric dust
+    const ps = new BABYLON.ParticleSystem('ps', 1800, scene);
 
-  particleSystem.addColorRemapGradient(0, new BABYLON.Color4(0, 1, 1, 0.5), new BABYLON.Color4(0, 1, 1, 0.5));
-  particleSystem.addColorRemapGradient(0.5, new BABYLON.Color4(1, 0, 1, 0.3), new BABYLON.Color4(1, 0, 1, 0.3));
-  particleSystem.addColorRemapGradient(1, new BABYLON.Color4(0, 1, 1, 0), new BABYLON.Color4(0, 1, 1, 0));
+    // Build circular texture
+    const ptex = new BABYLON.DynamicTexture('ptex', { width: 64, height: 64 }, scene);
+    const pctx = ptex.getContext();
+    const g = pctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    pctx.fillStyle = g;
+    pctx.fillRect(0, 0, 64, 64);
+    ptex.update();
+    ps.particleTexture = ptex;
 
-  particleSystem.start();
-  return { system: particleSystem, emitter };
-}
+    const emitterMesh = BABYLON.MeshBuilder.CreateBox('e', { size: 0.01 }, scene);
+    emitterMesh.isVisible = false;
+    ps.emitter = emitterMesh;
+    ps.minEmitBox = new BABYLON.Vector3(-40, -35, -40);
+    ps.maxEmitBox = new BABYLON.Vector3(40, 35, 40);
+    ps.minSize = 0.25;
+    ps.maxSize = 0.9;
+    ps.minLifeTime = 3;
+    ps.maxLifeTime = 6;
+    ps.emitRate = 120;
+    ps.minEmitPower = 0.3;
+    ps.maxEmitPower = 1.2;
+    ps.gravity = new BABYLON.Vector3(0, 0.05, 0);
 
-const { system: particles, emitter } = createParticleSystem();
+    // Alternating cyan/magenta particles
+    ps.addColorGradient(0,   new BABYLON.Color4(0, 1, 1, 0));
+    ps.addColorGradient(0.2, new BABYLON.Color4(0, 1, 1, 0.5));
+    ps.addColorGradient(0.5, new BABYLON.Color4(1, 0, 1, 0.35));
+    ps.addColorGradient(0.8, new BABYLON.Color4(0, 1, 1, 0.3));
+    ps.addColorGradient(1.0, new BABYLON.Color4(0, 1, 1, 0));
+    ps.start();
 
-// ============================================================================
-// FLOATING CONTENT CARDS WITH 3D POSITIONING
-// ============================================================================
+    // Grid floor
+    const gridMat = new BABYLON.StandardMaterial('grid', scene);
+    gridMat.emissiveColor = new BABYLON.Color3(0, 0.3, 0.4);
+    gridMat.wireframe = true;
+    gridMat.alpha = 0.15;
+    const grid = BABYLON.MeshBuilder.CreateGround('grid',
+      { width: 120, height: 120, subdivisions: 20 }, scene);
+    grid.position.y = -35;
+    grid.material = gridMat;
+    grid.isPickable = false;
 
-const cards = document.querySelectorAll('.card');
-const cardPositions = [
-  { x: 0, y: 5, z: 0, rotX: 0, rotY: 0 },           // Hero
-  { x: -15, y: -8, z: -5, rotX: 0.1, rotY: 0.3 },    // Profile
-  { x: 15, y: -8, z: -5, rotX: -0.1, rotY: -0.3 },   // Capabilities
-  { x: -20, y: 0, z: -8, rotX: 0, rotY: 0.4 },       // Archive
-  { x: 20, y: 0, z: -8, rotX: 0, rotY: -0.4 },       // Timeline
-  { x: -10, y: 15, z: -10, rotX: 0.2, rotY: 0.2 },   // Transmissions
-  { x: 10, y: 15, z: -10, rotX: -0.2, rotY: -0.2 },  // Credentials
-  { x: 0, y: -20, z: -5, rotX: 0, rotY: 0 }          // Contact
-];
+    // Render loop
+    let t = 0;
+    engine.runRenderLoop(() => {
+      t += 0.012;
 
-cards.forEach((card, idx) => {
-  const pos = cardPositions[idx];
-  card.style.left = 'auto';
-  card.style.top = 'auto';
-  card.style.transform = `perspective(1000px) translateZ(${pos.z * 10}px) rotateX(${pos.rotX}rad) rotateY(${pos.rotY}rad)`;
-  card.dataset.x = pos.x;
-  card.dataset.y = pos.y;
-  card.dataset.z = pos.z;
-  card.dataset.rotX = pos.rotX;
-  card.dataset.rotY = pos.rotY;
-});
+      // Animate floating shapes
+      shapes.forEach(s => {
+        s.mesh.rotation.x += 0.003 * s.speed;
+        s.mesh.rotation.y += 0.005 * s.speed;
+        s.mesh.position.y = s.pos[1] + Math.sin(t * s.speed + s.t) * 3;
+      });
 
-// ============================================================================
-// SCROLL TRACKING & CAMERA ANIMATION
-// ============================================================================
+      // Animate lights
+      lightC.position.x = Math.sin(t * 0.4) * 35;
+      lightC.position.y = Math.cos(t * 0.3) * 25;
+      lightM.position.x = Math.cos(t * 0.35) * 35;
+      lightM.position.y = Math.sin(t * 0.28) * 25;
 
-const scrollProxy = document.getElementById('scroll-proxy');
-let scrollProgress = 0;
+      // Slow camera orbit
+      camera.alpha += 0.0008;
 
-window.addEventListener('scroll', () => {
-  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-  scrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+      scene.render();
+    });
 
-  // Update HUD zone
-  let currentZone = 'INTRO';
-  cards.forEach((card) => {
-    const rect = card.getBoundingClientRect();
-    if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
-      currentZone = card.getAttribute('data-zone') || 'UNKNOWN';
-    }
+    window.addEventListener('resize', () => engine.resize());
+  }
+
+  // ── Card reveal with IntersectionObserver ─────────────────────────────────
+
+  const scenes   = document.querySelectorAll('.scene');
+  const dots     = document.querySelectorAll('.dot');
+  const zoneEl   = document.getElementById('zone');
+  const counterEl = document.getElementById('section-counter');
+  const progressBar = document.getElementById('progress-bar');
+  const total    = scenes.length;
+
+  let current = 0;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const card = entry.target.querySelector('.card');
+      if (entry.isIntersecting) {
+        const idx = parseInt(entry.target.dataset.idx);
+        current = idx;
+
+        // Reveal card
+        card.classList.remove('out');
+        card.classList.add('visible');
+
+        // Update HUD
+        zoneEl.textContent  = entry.target.dataset.zone;
+        counterEl.textContent = String(idx + 1).padStart(2, '0') + ' / ' +
+                                String(total).padStart(2, '0');
+
+        // Highlight dot
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      } else {
+        card.classList.remove('visible');
+      }
+    });
+  }, {
+    threshold: 0.45,
   });
-  document.getElementById('zone').textContent = currentZone;
-});
 
-// ============================================================================
-// ANIMATION LOOP
-// ============================================================================
+  scenes.forEach(s => observer.observe(s));
 
-let time = 0;
+  // ── Scroll progress bar ───────────────────────────────────────────────────
 
-engine.runRenderLoop(() => {
-  time += 0.016;
+  window.addEventListener('scroll', () => {
+    const scrolled = window.scrollY;
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = (max > 0 ? (scrolled / max) * 100 : 0) + '%';
+  }, { passive: true });
 
-  // Animate camera with scroll
-  camera.position.y = -scrollProgress * 40;
-  camera.position.z = 30 + scrollProgress * 20;
-  camera.rotation.x = scrollProgress * 0.3;
+  // ── Dot-nav click scrolls to section ─────────────────────────────────────
 
-  // Animate particle emitter
-  emitter.position.y = Math.sin(time * 0.5) * 10;
-  emitter.position.x = Math.cos(time * 0.3) * 15;
-
-  // Animate point lights
-  pointLight1.position.x = Math.sin(time * 0.4) * 30;
-  pointLight1.position.y = Math.cos(time * 0.35) * 30;
-  pointLight2.position.x = Math.cos(time * 0.4) * 30;
-  pointLight2.position.y = Math.sin(time * 0.35) * 30;
-
-  // Animate cards with scroll influence
-  cards.forEach((card, idx) => {
-    const pos = cardPositions[idx];
-    const offsetY = scrollProgress * 50;
-    const offsetZ = scrollProgress * 15;
-    const rotInfluence = Math.sin(time * 0.3 + idx) * 0.05;
-
-    const x = pos.x + Math.sin(time * 0.2 + idx) * 2;
-    const y = pos.y - offsetY + Math.cos(time * 0.15 + idx) * 2;
-    const z = pos.z - offsetZ;
-    const rotX = pos.rotX + rotInfluence;
-    const rotY = pos.rotY + rotInfluence;
-
-    // Calculate screen position from 3D coords
-    const scale = 800 / (z + 50);
-    const screenX = (x * scale + window.innerWidth / 2) - 300;
-    const screenY = (y * scale + window.innerHeight / 2) - 150;
-
-    card.style.left = Math.max(0, Math.min(screenX, window.innerWidth - 300)) + 'px';
-    card.style.top = Math.max(0, Math.min(screenY, window.innerHeight - 200)) + 'px';
-    card.style.opacity = Math.max(0.3, Math.min(1, 1 - Math.abs(scrollProgress - (idx / cards.length)) * 2));
-    card.style.transform = `perspective(1500px) translateZ(${z * 10}px) rotateX(${rotX}rad) rotateY(${rotY}rad) scale(${0.8 + Math.abs(Math.sin(time * 0.2 + idx)) * 0.1})`;
-  });
-
-  scene.render();
-});
-
-// ============================================================================
-// BOOT SEQUENCE
-// ============================================================================
-
-function initBoot() {
-  const bootEl = document.getElementById('boot');
-  setTimeout(() => {
-    bootEl.classList.add('hidden');
-  }, 2400);
-}
-
-// ============================================================================
-// COPY TO CLIPBOARD
-// ============================================================================
-
-const copyButton = document.getElementById('copy');
-if (copyButton) {
-  copyButton.addEventListener('click', () => {
-    const email = 'prabh_simran@hotmail.com';
-    navigator.clipboard.writeText(email).then(() => {
-      copyButton.textContent = '[COPIED!]';
-      copyButton.classList.add('copied');
-      setTimeout(() => {
-        copyButton.textContent = '[COPY]';
-        copyButton.classList.remove('copied');
-      }, 2000);
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const idx = parseInt(dot.dataset.idx);
+      scenes[idx].scrollIntoView({ behavior: 'smooth' });
     });
   });
-}
 
-// ============================================================================
-// WINDOW RESIZE
-// ============================================================================
+  // ── Copy button ───────────────────────────────────────────────────────────
 
-window.addEventListener('resize', () => {
-  engine.resize();
-});
+  const copyBtn = document.getElementById('copy');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText('prabh_simran@hotmail.com').then(() => {
+        copyBtn.textContent = '[COPIED!]';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = '[COPY]';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+  }
 
-// ============================================================================
-// INITIALIZATION
-// ============================================================================
+  // ── Boot sequence ─────────────────────────────────────────────────────────
 
-document.addEventListener('DOMContentLoaded', () => {
+  function initBoot() {
+    const boot = document.getElementById('boot');
+    setTimeout(() => {
+      boot.classList.add('out');
+      setTimeout(() => boot.remove(), 900);
+    }, 2600);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+
   initBoot();
-});
+  initBabylon();
+
+})();

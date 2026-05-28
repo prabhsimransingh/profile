@@ -4,19 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prabh Singh — Cyberspace</title>
-  <meta name="description" content="Immersive 3D sci-fi portfolio with floating holographic interfaces.">
-  <meta name="theme-color" content="#000000">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@r160/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@r160/examples/jsm/"
+      "three": "https://cdn.jsdelivr.net/npm/three@r160/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@r160/examples/jsm/"
     }
   }
   </script>
@@ -27,213 +23,139 @@
 <script>
 (function() {
   const _k = 'UHJhYmhTaW5naDIwMjY=';
-  if (sessionStorage.getItem('_auth') === _k) return;
-  const input = prompt('Enter access code:');
-  if (input === null || btoa(input) !== _k) {
-    document.documentElement.innerHTML = '<body style="background:#000;color:#00ff00;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:1.2rem">ACCESS DENIED</body>';
+  if (sessionStorage.getItem('auth') === _k) return;
+  const p = prompt('Enter access code:');
+  if (!p || btoa(p) !== _k) {
+    document.documentElement.innerHTML = '<body style="background:#000;color:#0f0;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh">ACCESS DENIED</body>';
   } else {
-    sessionStorage.setItem('_auth', _k);
+    sessionStorage.setItem('auth', _k);
   }
 })();
 </script>
 
-<!-- Boot Screen -->
-<div id="boot-overlay" class="boot">
-  <div class="boot__content">
-    <div class="boot__logo">PRABH.OS</div>
-    <div class="boot__text" id="boot-text"></div>
-    <div class="boot__progress"><div class="boot__bar" id="boot-bar"></div></div>
-  </div>
-</div>
-
-<!-- Three.js Canvas -->
+<!-- 3D Canvas (fixed background) -->
 <canvas id="canvas"></canvas>
 
-<!-- CSS3D Container (for floating content cards) -->
-<div id="css3d-container"></div>
+<!-- Boot Screen -->
+<div id="boot" class="boot">
+  <div class="boot__inner">
+    <div class="boot__text">PRABH.OS v3.0</div>
+    <div class="boot__progress"><div class="boot__bar"></div></div>
+  </div>
+</div>
 
 <!-- HUD Overlay -->
 <div class="hud">
-  <div class="hud__top-left">
-    <div class="hud__line">PRABH.OS v3.0</div>
-    <div class="hud__line">STATUS: <span class="hud__online">ONLINE</span></div>
-    <div class="hud__line">DEPTH: <span id="hud-depth">0000.00</span></div>
-  </div>
-  <div class="hud__bottom-right">
-    <div class="hud__line"><span id="hud-zone">IDENTITY</span></div>
-    <div class="hud__progress"><div class="hud__progress-bar" id="hud-bar"></div></div>
-  </div>
+  <div class="hud__tl">ONLINE</div>
+  <div class="hud__br"><span id="zone">INTRO</span></div>
 </div>
 
-<!-- Glitch Overlay -->
-<div class="glitch-overlay" id="glitch"></div>
+<!-- Content Sections (normal scrolling) -->
+<main class="main">
 
-<!-- Content (as CSS3D objects) -->
-<div id="content">
-
-  <!-- CARD 1: HERO/IDENTITY -->
-  <div class="card card--hero" data-position="0" data-zone="IDENTITY">
-    <div class="card__inner">
-      <div class="card__label">[ IDENTITY ]</div>
-      <h1 class="card__title">PRABH SINGH</h1>
-      <p class="card__subtitle">Engineering Executive · Kubernetes Pioneer</p>
-      <p class="card__text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI data infrastructure at NetApp. Dual MS from CMU.</p>
-      <div class="card__meta">
-        <span>15+ years</span>
-        <span>•</span>
-        <span>100+ engineers led</span>
-        <span>•</span>
-        <span>3 patents</span>
+  <section class="section hero" data-zone="IDENTITY">
+    <div class="container">
+      <div class="label">[ IDENTITY ]</div>
+      <h1>PRABH SINGH</h1>
+      <p class="subtitle">Engineering Executive · Kubernetes Pioneer</p>
+      <p>Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
+      <div class="meta">
+        <span>15+ Years</span>
+        <span>100+ Engineers</span>
+        <span>3 Patents</span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 2: PROFILE -->
-  <div class="card" data-position="1" data-zone="PROFILE">
-    <div class="card__inner">
-      <div class="card__label">[ PROFILE ]</div>
-      <h2 class="card__title">SYSTEM OPERATOR</h2>
-      <p class="card__text">Among the first to run Kubernetes in Fortune 500 production (2015–16). Built the platform underpinning Salesforce's largest infrastructure project.</p>
-      <div class="card__stats">
-        <div class="stat"><span class="stat__val">1,800+</span><span class="stat__label">Services @ 99.99% SLA</span></div>
-        <div class="stat"><span class="stat__val">$74B</span><span class="stat__label">Assets on Platform</span></div>
+  <section class="section" data-zone="PROFILE">
+    <div class="container">
+      <div class="label">[ PROFILE ]</div>
+      <h2>SYSTEM OPERATOR</h2>
+      <p>Among the first to run Kubernetes in Fortune 500 production (2015–16). Architected the platform underpinning Salesforce's largest infrastructure initiative.</p>
+      <div class="stats">
+        <div class="stat"><span class="stat__v">1,800+</span><span class="stat__l">Services @ 99.99% SLA</span></div>
+        <div class="stat"><span class="stat__v">$74B</span><span class="stat__l">Assets on Platform</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 3: SKILLS -->
-  <div class="card" data-position="2" data-zone="CAPABILITIES">
-    <div class="card__inner">
-      <div class="card__label">[ CAPABILITIES ]</div>
-      <h2 class="card__title">TECHNICAL DEPTH</h2>
-      <div class="card__skills">
-        <span class="skill">Kubernetes</span>
-        <span class="skill">Python</span>
-        <span class="skill">Go</span>
-        <span class="skill">TypeScript</span>
-        <span class="skill">AWS</span>
-        <span class="skill">GCP</span>
-        <span class="skill">Terraform</span>
-        <span class="skill">AI Agents</span>
-        <span class="skill">Microservices</span>
-        <span class="skill">Zero Trust</span>
+  <section class="section" data-zone="CAPABILITIES">
+    <div class="container">
+      <div class="label">[ CAPABILITIES ]</div>
+      <h2>TECHNICAL DEPTH</h2>
+      <div class="chips">
+        <span>Kubernetes</span><span>Python</span><span>Go</span><span>TypeScript</span>
+        <span>AWS</span><span>GCP</span><span>Terraform</span><span>AI Agents</span>
+        <span>Microservices</span><span>Zero Trust</span><span>Service Mesh</span><span>CI/CD</span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 4: PROJECTS -->
-  <div class="card" data-position="3" data-zone="ARCHIVE">
-    <div class="card__inner">
-      <div class="card__label">[ ARCHIVE ]</div>
-      <h2 class="card__title">FEATURED PROJECTS</h2>
-      <div class="card__projects">
-        <div class="project">
-          <div class="project__name">ApplyPilot</div>
-          <div class="project__desc">AI job application pipeline with Claude API + Playwright</div>
-          <div class="project__tags"><span>Python</span><span>AI</span></div>
-        </div>
-        <div class="project">
-          <div class="project__name">Job Apply Bot</div>
-          <div class="project__desc">End-to-end LinkedIn + Indeed automation</div>
-          <div class="project__tags"><span>Python</span><span>AI</span></div>
-        </div>
-        <div class="project">
-          <div class="project__name">CricManager</div>
-          <div class="project__desc">Full-stack cricket club platform</div>
-          <div class="project__tags"><span>React</span><span>Node</span></div>
-        </div>
-        <div class="project">
-          <div class="project__name">Budget Tracker</div>
-          <div class="project__desc">AI-powered personal finance OS</div>
-          <div class="project__tags"><span>TypeScript</span><span>Next.js</span></div>
-        </div>
+  <section class="section" data-zone="ARCHIVE">
+    <div class="container">
+      <div class="label">[ ARCHIVE ]</div>
+      <h2>FEATURED PROJECTS</h2>
+      <div class="projects">
+        <div class="proj"><span class="proj__name">ApplyPilot</span><span class="proj__desc">AI job application pipeline</span></div>
+        <div class="proj"><span class="proj__name">Job Apply Bot</span><span class="proj__desc">LinkedIn + Indeed automation</span></div>
+        <div class="proj"><span class="proj__name">CricManager</span><span class="proj__desc">Cricket club platform</span></div>
+        <div class="proj"><span class="proj__name">Budget Tracker</span><span class="proj__desc">AI finance OS</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 5: CAREER -->
-  <div class="card" data-position="4" data-zone="TIMELINE">
-    <div class="card__inner">
-      <div class="card__label">[ TIMELINE ]</div>
-      <h2 class="card__title">CAREER LOG</h2>
-      <div class="card__timeline">
-        <div class="tl-entry">
-          <div class="tl-year">2023—NOW</div>
-          <div class="tl-role">Senior Director · AI Data Infrastructure</div>
-          <div class="tl-org">NetApp</div>
-        </div>
-        <div class="tl-entry">
-          <div class="tl-year">2015—2023</div>
-          <div class="tl-role">Principal Engineer → Senior Director</div>
-          <div class="tl-org">Salesforce</div>
-        </div>
-        <div class="tl-entry">
-          <div class="tl-year">2013—2015</div>
-          <div class="tl-role">Master of Science</div>
-          <div class="tl-org">Carnegie Mellon University</div>
-        </div>
+  <section class="section" data-zone="TIMELINE">
+    <div class="container">
+      <div class="label">[ TIMELINE ]</div>
+      <h2>CAREER LOG</h2>
+      <div class="timeline">
+        <div class="tl__item"><span class="tl__year">2023–NOW</span><span class="tl__role">Senior Director · AI Data Infrastructure @ NetApp</span></div>
+        <div class="tl__item"><span class="tl__year">2015–2023</span><span class="tl__role">Principal Engineer → Senior Director @ Salesforce</span></div>
+        <div class="tl__item"><span class="tl__year">2013–2015</span><span class="tl__role">MS Information Systems @ Carnegie Mellon</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 6: SPEAKING -->
-  <div class="card" data-position="5" data-zone="TRANSMISSIONS">
-    <div class="card__inner">
-      <div class="card__label">[ TRANSMISSIONS ]</div>
-      <h2 class="card__title">SPEAKING + PUBS</h2>
-      <div class="card__speaking">
-        <div class="speak"><strong>NVIDIA GTC 2025</strong> — AI Infrastructure at Scale</div>
-        <div class="speak"><strong>KubeCon EU 2024</strong> — Representing NetApp</div>
-        <div class="speak"><strong>NetApp INSIGHT</strong> — Data Guardrails for AI</div>
-      </div>
-      <div class="card__pubs">
-        <div class="pub"><strong>Medium:</strong> Stop Rebuilding the Same AI Pipeline</div>
-        <div class="pub"><strong>NetApp:</strong> Revolutionizing Data Guardrails</div>
-        <div class="pub"><strong>GitHub:</strong> kube-synthetic-scaler (open source)</div>
+  <section class="section" data-zone="TRANSMISSIONS">
+    <div class="container">
+      <div class="label">[ TRANSMISSIONS ]</div>
+      <h2>SPEAKING + PUBS</h2>
+      <p><strong>Speaking:</strong> NVIDIA GTC 2025, KubeCon EU 2024, NetApp INSIGHT</p>
+      <p><strong>Publications:</strong> Medium, NetApp Tech Blog, GitHub (kube-synthetic-scaler)</p>
+    </div>
+  </section>
+
+  <section class="section" data-zone="CREDENTIALS">
+    <div class="container">
+      <div class="label">[ CREDENTIALS ]</div>
+      <h2>AWARDS & CERTS</h2>
+      <div class="creds">
+        <span>2024: Salesforce 5-Year</span>
+        <span>2022: Salesforce 3-Year</span>
+        <span>FY21: Best Tech Talk</span>
+        <span>2019: Certified ScrumMaster</span>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- CARD 7: AWARDS -->
-  <div class="card" data-position="6" data-zone="CREDENTIALS">
-    <div class="card__inner">
-      <div class="card__label">[ CREDENTIALS ]</div>
-      <h2 class="card__title">AWARDS & CERTS</h2>
-      <div class="card__creds">
-        <div class="cred"><span class="cred__year">2024</span> Salesforce 5-Year Award</div>
-        <div class="cred"><span class="cred__year">2022</span> Salesforce 3-Year Award</div>
-        <div class="cred"><span class="cred__year">FY21</span> Best Tech Talk Series</div>
-        <div class="cred"><span class="cred__year">2019</span> Certified ScrumMaster</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- CARD 8: CONTACT -->
-  <div class="card card--contact" data-position="7" data-zone="INTERFACE">
-    <div class="card__inner">
-      <div class="card__label">[ INTERFACE ]</div>
-      <h2 class="card__title">ESTABLISH CHANNEL</h2>
-      <p class="card__text">Open to senior engineering leadership, advisory work, and speaking engagements.</p>
-      <div class="card__contact">
-        <div class="contact-item">
-          <div class="contact-label">EMAIL</div>
-          <div class="contact-value">prabh_simran@hotmail.com</div>
-          <button class="contact-copy" id="copy-btn">[COPY]</button>
-        </div>
-        <div class="contact-item">
-          <div class="contact-label">LOCATION</div>
-          <div class="contact-value">Fremont, CA · Open to Remote</div>
-        </div>
-        <div class="contact-links">
+  <section class="section contact" data-zone="INTERFACE">
+    <div class="container">
+      <div class="label">[ INTERFACE ]</div>
+      <h2>ESTABLISH CHANNEL</h2>
+      <p>Open to senior engineering leadership, advisory, speaking engagements.</p>
+      <div class="contact__box">
+        <div><strong>Email:</strong> prabh_simran@hotmail.com <button id="copy">[COPY]</button></div>
+        <div><strong>Location:</strong> Fremont, CA · Open to remote</div>
+        <div class="links">
           <a href="https://linkedin.com/in/prabhssingh" target="_blank">LinkedIn</a>
           <a href="https://github.com/prabhsimransingh" target="_blank">GitHub</a>
           <a href="https://medium.com/@prabhsingh" target="_blank">Medium</a>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-</div>
+</main>
 
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>

@@ -474,31 +474,40 @@
         }
       }
 
-      // ── Vertical drum / Ferris-wheel card rotation ────────────────────
-      // Cards are fixed at left:3vw (CSS). JS rotates them around the X axis
-      // like a Ferris wheel: active card faces front, past cards arc upward
-      // and back, upcoming cards wait below and rotate into view.
+      // ── True 3D Y-axis orbit around the column ────────────────────────
+      // Cards orbit the vertical pillar in 3D — each card physically travels
+      // in a circular arc: left-facing → sweeps sideways around the column
+      // → disappears behind it → next card emerges from the other side.
+      // This is rotation around the Y axis (vertical column axis), not X.
       smoothScroll += (scrollProgress - smoothScroll) * 0.07;
 
       if (introComplete) {
-        const DRUM_R = 280; // px — radius of the vertical drum
+        // Orbit radius = distance from card center to column center.
+        // Column is at ~50vw, card center at ~3vw + 22vw = 25vw.
+        // On a 1440px screen: (0.50 - 0.25) * 1440 ≈ 360px.
+        const ORBIT_R = Math.round(window.innerWidth * 0.25);
+
         sections.forEach((s, i) => {
-          const delta    = smoothScroll - i;
-          const absDelta = Math.abs(delta);
-          // Drum angle: 90° per section so card is fully horizontal at ±1
-          const ang = delta * (Math.PI / 2);
-          // Y: past cards rise up (negative), future cards wait below (positive)
-          const ty  = -Math.sin(ang) * DRUM_R;
-          // Z: recede behind as they rotate to top or bottom
-          const tz  = (Math.cos(ang) - 1) * DRUM_R;
-          // Tilt: card rotates face-up as it goes over the top
-          const rx  = ang * (180 / Math.PI);
-          // Cosine opacity — smooth, both transition cards visible simultaneously
-          const op  = Math.max(0, Math.cos(Math.min(absDelta, 1) * Math.PI / 2));
+          const delta = smoothScroll - i;
+          // 90° of Y-axis orbit per section — card is fully edge-on (invisible) at ±1
+          const angle = delta * (Math.PI / 2);
+
+          // X: card sweeps right as angle increases (past cards exit right)
+          const tx = Math.sin(angle) * ORBIT_R;
+          // Z: card recedes behind column as it orbits to the side
+          const tz = (Math.cos(angle) - 1) * ORBIT_R;
+          // Y: slight helix rise as card orbits (makes motion feel 3-dimensional)
+          const ty = delta * -35;
+          // Y-rotation: card face tracks the orbit so it stays readable while turning
+          const ry = angle * (180 / Math.PI);
+
+          // Opacity follows cosine of orbit angle:
+          // angle=0 → fully visible, angle=90° → invisible (edge-on)
+          const op = Math.max(0, Math.cos(angle));
 
           s.style.opacity       = op;
-          s.style.transform     = `perspective(1100px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateX(${rx}deg)`;
-          s.style.pointerEvents = absDelta < 0.42 ? 'auto' : 'none';
+          s.style.transform     = `perspective(1100px) translateX(${tx}px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateY(${ry}deg)`;
+          s.style.pointerEvents = Math.abs(delta) < 0.38 ? 'auto' : 'none';
         });
       }
 

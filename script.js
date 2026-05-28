@@ -1,82 +1,182 @@
 // ============================================================================
-// CANVAS ANIMATION (CSS-based background glow)
+// BABYLON.JS IMMERSIVE SCI-FI EXPERIENCE
 // ============================================================================
 
-const canvas = document.querySelector('canvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById('renderCanvas');
+const engine = new BABYLON.Engine(canvas, true);
 
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+// Create scene
+const scene = new BABYLON.Scene(engine);
+scene.clearColor = new BABYLON.Color3(0, 0, 0);
+scene.collisionsEnabled = true;
+
+// Camera - will be controlled by scroll
+const camera = new BABYLON.UniversalCamera('camera', new BABYLON.Vector3(0, 0, 30));
+camera.attachControl(canvas, true);
+camera.angularSensibility = 1000;
+camera.inertia = 0.7;
+
+// Lighting
+const ambientLight = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), scene);
+ambientLight.intensity = 0.3;
+ambientLight.diffuse = new BABYLON.Color3(0, 0.4, 0.6);
+
+const pointLight1 = new BABYLON.PointLight('light1', new BABYLON.Vector3(20, 20, 20), scene);
+pointLight1.intensity = 0.4;
+pointLight1.range = 100;
+pointLight1.diffuse = new BABYLON.Color3(0, 1, 1);
+
+const pointLight2 = new BABYLON.PointLight('light2', new BABYLON.Vector3(-20, -20, 20), scene);
+pointLight2.intensity = 0.4;
+pointLight2.range = 100;
+pointLight2.diffuse = new BABYLON.Color3(1, 0, 1);
+
+// ============================================================================
+// PARTICLE SYSTEM - VOLUMETRIC DUST/ENERGY
+// ============================================================================
+
+function createParticleSystem() {
+  const particleSystem = new BABYLON.ParticleSystem('particles', 2000, scene);
+
+  particleSystem.particleTexture = new BABYLON.DynamicTexture('particleTexture', 64);
+  const ctx = particleSystem.particleTexture.getContext();
+  ctx.fillStyle = 'white';
+  ctx.beginPath();
+  ctx.arc(32, 32, 32, 0, Math.PI * 2);
+  ctx.fill();
+  particleSystem.particleTexture.update();
+
+  const emitter = BABYLON.MeshBuilder.CreateSphere('emitter', { diameter: 50 }, scene);
+  emitter.isVisible = false;
+  particleSystem.emitter = emitter;
+
+  particleSystem.minEmitBox = new BABYLON.Vector3(-30, -30, -30);
+  particleSystem.maxEmitBox = new BABYLON.Vector3(30, 30, 30);
+
+  particleSystem.minEmitPower = 0.5;
+  particleSystem.maxEmitPower = 2;
+  particleSystem.minLifeTime = 2;
+  particleSystem.maxLifeTime = 4;
+
+  particleSystem.minSize = 0.2;
+  particleSystem.maxSize = 1;
+  particleSystem.minScaleFunction = (start, end) => 0.8;
+  particleSystem.maxScaleFunction = (start, end) => 1.2;
+
+  particleSystem.emitRate = 100;
+  particleSystem.gravity = new BABYLON.Vector3(0, 0.1, 0);
+  particleSystem.minAngularSpeed = -Math.PI;
+  particleSystem.maxAngularSpeed = Math.PI;
+
+  particleSystem.addColorRemapGradient(0, new BABYLON.Color4(0, 1, 1, 0.5), new BABYLON.Color4(0, 1, 1, 0.5));
+  particleSystem.addColorRemapGradient(0.5, new BABYLON.Color4(1, 0, 1, 0.3), new BABYLON.Color4(1, 0, 1, 0.3));
+  particleSystem.addColorRemapGradient(1, new BABYLON.Color4(0, 1, 1, 0), new BABYLON.Color4(0, 1, 1, 0));
+
+  particleSystem.start();
+  return { system: particleSystem, emitter };
 }
 
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-// Animate canvas with glowing grid and particles
-function animateCanvas() {
-  // Clear with semi-transparent black for trail effect
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // Draw grid
-  ctx.strokeStyle = 'rgba(0, 255, 255, 0.1)';
-  ctx.lineWidth = 1;
-  const gridSize = 40;
-  for (let x = 0; x < canvas.width; x += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, canvas.height);
-    ctx.stroke();
-  }
-  for (let y = 0; y < canvas.height; y += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(canvas.width, y);
-    ctx.stroke();
-  }
-
-  // Draw particles
-  const scroll = window.scrollY;
-  for (let i = 0; i < 20; i++) {
-    const x = (Math.sin(Date.now() * 0.0001 + i) * 0.5 + 0.5) * canvas.width;
-    const y = (Math.cos(Date.now() * 0.00008 + i * 0.5) * 0.5 + 0.5) * canvas.height;
-    const size = Math.sin(Date.now() * 0.001 + i) * 1.5 + 2;
-    const color = i % 2 === 0 ? 'rgba(0, 255, 255, 0.3)' : 'rgba(255, 0, 255, 0.3)';
-
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, size, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.arc(x, y, size * 1.5, 0, Math.PI * 2);
-    ctx.stroke();
-  }
-
-  requestAnimationFrame(animateCanvas);
-}
-
-animateCanvas();
+const { system: particles, emitter } = createParticleSystem();
 
 // ============================================================================
-// SCROLL & HUD
+// FLOATING CONTENT CARDS WITH 3D POSITIONING
 // ============================================================================
 
-const sections = document.querySelectorAll('.section');
-const zoneDisplay = document.querySelector('#zone');
+const cards = document.querySelectorAll('.card');
+const cardPositions = [
+  { x: 0, y: 5, z: 0, rotX: 0, rotY: 0 },           // Hero
+  { x: -15, y: -8, z: -5, rotX: 0.1, rotY: 0.3 },    // Profile
+  { x: 15, y: -8, z: -5, rotX: -0.1, rotY: -0.3 },   // Capabilities
+  { x: -20, y: 0, z: -8, rotX: 0, rotY: 0.4 },       // Archive
+  { x: 20, y: 0, z: -8, rotX: 0, rotY: -0.4 },       // Timeline
+  { x: -10, y: 15, z: -10, rotX: 0.2, rotY: 0.2 },   // Transmissions
+  { x: 10, y: 15, z: -10, rotX: -0.2, rotY: -0.2 },  // Credentials
+  { x: 0, y: -20, z: -5, rotX: 0, rotY: 0 }          // Contact
+];
+
+cards.forEach((card, idx) => {
+  const pos = cardPositions[idx];
+  card.style.left = 'auto';
+  card.style.top = 'auto';
+  card.style.transform = `perspective(1000px) translateZ(${pos.z * 10}px) rotateX(${pos.rotX}rad) rotateY(${pos.rotY}rad)`;
+  card.dataset.x = pos.x;
+  card.dataset.y = pos.y;
+  card.dataset.z = pos.z;
+  card.dataset.rotX = pos.rotX;
+  card.dataset.rotY = pos.rotY;
+});
+
+// ============================================================================
+// SCROLL TRACKING & CAMERA ANIMATION
+// ============================================================================
+
+const scrollProxy = document.getElementById('scroll-proxy');
+let scrollProgress = 0;
 
 window.addEventListener('scroll', () => {
+  const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+  scrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+
+  // Update HUD zone
   let currentZone = 'INTRO';
-  sections.forEach((section) => {
-    const rect = section.getBoundingClientRect();
-    if (rect.top < window.innerHeight / 2) {
-      currentZone = section.getAttribute('data-zone') || 'UNKNOWN';
+  cards.forEach((card) => {
+    const rect = card.getBoundingClientRect();
+    if (rect.top < window.innerHeight / 2 && rect.bottom > 0) {
+      currentZone = card.getAttribute('data-zone') || 'UNKNOWN';
     }
   });
-  if (zoneDisplay) zoneDisplay.textContent = currentZone;
+  document.getElementById('zone').textContent = currentZone;
+});
+
+// ============================================================================
+// ANIMATION LOOP
+// ============================================================================
+
+let time = 0;
+
+engine.runRenderLoop(() => {
+  time += 0.016;
+
+  // Animate camera with scroll
+  camera.position.y = -scrollProgress * 40;
+  camera.position.z = 30 + scrollProgress * 20;
+  camera.rotation.x = scrollProgress * 0.3;
+
+  // Animate particle emitter
+  emitter.position.y = Math.sin(time * 0.5) * 10;
+  emitter.position.x = Math.cos(time * 0.3) * 15;
+
+  // Animate point lights
+  pointLight1.position.x = Math.sin(time * 0.4) * 30;
+  pointLight1.position.y = Math.cos(time * 0.35) * 30;
+  pointLight2.position.x = Math.cos(time * 0.4) * 30;
+  pointLight2.position.y = Math.sin(time * 0.35) * 30;
+
+  // Animate cards with scroll influence
+  cards.forEach((card, idx) => {
+    const pos = cardPositions[idx];
+    const offsetY = scrollProgress * 50;
+    const offsetZ = scrollProgress * 15;
+    const rotInfluence = Math.sin(time * 0.3 + idx) * 0.05;
+
+    const x = pos.x + Math.sin(time * 0.2 + idx) * 2;
+    const y = pos.y - offsetY + Math.cos(time * 0.15 + idx) * 2;
+    const z = pos.z - offsetZ;
+    const rotX = pos.rotX + rotInfluence;
+    const rotY = pos.rotY + rotInfluence;
+
+    // Calculate screen position from 3D coords
+    const scale = 800 / (z + 50);
+    const screenX = (x * scale + window.innerWidth / 2) - 300;
+    const screenY = (y * scale + window.innerHeight / 2) - 150;
+
+    card.style.left = Math.max(0, Math.min(screenX, window.innerWidth - 300)) + 'px';
+    card.style.top = Math.max(0, Math.min(screenY, window.innerHeight - 200)) + 'px';
+    card.style.opacity = Math.max(0.3, Math.min(1, 1 - Math.abs(scrollProgress - (idx / cards.length)) * 2));
+    card.style.transform = `perspective(1500px) translateZ(${z * 10}px) rotateX(${rotX}rad) rotateY(${rotY}rad) scale(${0.8 + Math.abs(Math.sin(time * 0.2 + idx)) * 0.1})`;
+  });
+
+  scene.render();
 });
 
 // ============================================================================
@@ -84,44 +184,17 @@ window.addEventListener('scroll', () => {
 // ============================================================================
 
 function initBoot() {
-  const bootEl = document.querySelector('.boot');
-  const bootBar = document.querySelector('.boot__bar');
-
-  if (bootEl) {
-    setTimeout(() => {
-      bootEl.classList.add('hidden');
-    }, 2400);
-  }
+  const bootEl = document.getElementById('boot');
+  setTimeout(() => {
+    bootEl.classList.add('hidden');
+  }, 2400);
 }
-
-// ============================================================================
-// LENIS SMOOTH SCROLL
-// ============================================================================
-
-const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  direction: 'vertical',
-  gestureDirection: 'vertical',
-  smooth: true,
-});
-
-lenis.on('scroll', (e) => {
-  // Scroll event for future integrations
-});
-
-function rafCallback(time) {
-  lenis.raf(time * 1000);
-  requestAnimationFrame(rafCallback);
-}
-
-requestAnimationFrame(rafCallback);
 
 // ============================================================================
 // COPY TO CLIPBOARD
 // ============================================================================
 
-const copyButton = document.querySelector('#copy');
+const copyButton = document.getElementById('copy');
 if (copyButton) {
   copyButton.addEventListener('click', () => {
     const email = 'prabh_simran@hotmail.com';
@@ -141,13 +214,7 @@ if (copyButton) {
 // ============================================================================
 
 window.addEventListener('resize', () => {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-
-  renderer.setSize(width, height);
+  engine.resize();
 });
 
 // ============================================================================

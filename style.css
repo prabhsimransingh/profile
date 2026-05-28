@@ -352,7 +352,166 @@ button#copy.copied { border-color: var(--magenta); color: var(--magenta); }
 .social-btn { padding: 0.65rem 1.5rem; border: 1px solid rgba(0,255,255,0.3); border-radius: 25px; color: var(--cyan); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: all 0.25s ease; background: rgba(0,255,255,0.04); }
 .social-btn:hover { background: rgba(0,255,255,0.12); border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,255,255,0.2); transform: translateY(-2px); }
 
+/* ── Spine timeline layout ────────────────────────────────────── */
+#spine-timeline {
+  position: relative;
+}
+
+/* Central glowing spine line */
+#spine-timeline::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0,255,255,0.8) 6%,
+    rgba(0,255,255,0.5) 35%,
+    rgba(255,0,255,0.5) 65%,
+    rgba(0,255,255,0.4) 94%,
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(0,255,255,0.3), 0 0 60px rgba(0,255,255,0.08);
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Left/right scene layout */
+.scene--left,
+.scene--right {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 3rem 0;
+  justify-content: flex-start;
+}
+
+.scene--left {
+  padding-left: 4%;
+  padding-right: calc(50% + 5rem);
+}
+
+.scene--right {
+  justify-content: flex-end;
+  padding-left: calc(50% + 5rem);
+  padding-right: 4%;
+}
+
+/* Glowing node on the spine at midpoint of each section */
+.spine-node {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,255,255,0.8);
+  background: rgba(0,4,20,0.9);
+  box-shadow: 0 0 16px rgba(0,255,255,0.5), 0 0 36px rgba(0,255,255,0.2);
+  z-index: 15;
+  transition: all 0.45s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
+}
+
+/* Active spine node when section enters viewport */
+.scene--active .spine-node {
+  background: rgba(0,255,255,0.35);
+  box-shadow: 0 0 28px rgba(0,255,255,0.9), 0 0 70px rgba(0,255,255,0.45), 0 0 120px rgba(0,255,255,0.15);
+  transform: translate(-50%, -50%) scale(2);
+  border-color: var(--cyan);
+}
+
+/* Horizontal connector line (spine → card) */
+.scene--left::after {
+  content: '';
+  position: absolute;
+  right: calc(50% + 1px);
+  top: 50%;
+  width: 5rem;
+  height: 1px;
+  background: linear-gradient(to left, rgba(0,255,255,0.65), transparent);
+  transform: translateY(-50%);
+  z-index: 6;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.scene--right::after {
+  content: '';
+  position: absolute;
+  left: calc(50% + 1px);
+  top: 50%;
+  width: 5rem;
+  height: 1px;
+  background: linear-gradient(to right, rgba(0,255,255,0.65), transparent);
+  transform: translateY(-50%);
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* Spine cards: directional slide-in, constrained width */
+.scene--left .card {
+  opacity: 0;
+  transform: translateX(-50px) scale(0.97);
+  max-width: 580px;
+  width: 100%;
+}
+.scene--right .card {
+  opacity: 0;
+  transform: translateX(50px) scale(0.97);
+  max-width: 580px;
+  width: 100%;
+}
+.scene--left .card.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+.scene--right .card.visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* 2-column grids inside half-screen spine cards */
+.scene--left .stat-grid,
+.scene--right .stat-grid,
+.scene--left .project-grid,
+.scene--right .project-grid,
+.scene--left .speaking-grid,
+.scene--right .speaking-grid,
+.scene--left .awards-grid,
+.scene--right .awards-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Slightly smaller h2 in spine cards */
+.scene--left h2,
+.scene--right h2 {
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  margin-bottom: 0.9rem;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .scene--left {
+    padding-left: 3%;
+    padding-right: calc(50% + 4rem);
+  }
+  .scene--right {
+    padding-left: calc(50% + 4rem);
+    padding-right: 3%;
+  }
+  .scene--left .card,
+  .scene--right .card {
+    max-width: 480px;
+  }
+}
+
 @media (max-width: 900px) {
   .card--hero { max-width: 95vw; }
   .card--wide { max-width: 95vw; }
@@ -366,10 +525,50 @@ button#copy.copied { border-color: var(--magenta); color: var(--magenta); }
   h2 { font-size: 2rem; }
   .scene { padding: 4rem 1.5rem 2rem; }
   .card__inner { padding: 2rem; }
+
+  /* Mobile: collapse spine layout to centered */
+  #spine-timeline::before { display: none; }
+  .spine-node { display: none; }
+  .scene--left::after,
+  .scene--right::after { display: none; }
+
+  .scene--left,
+  .scene--right {
+    justify-content: center;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .scene--left .card,
+  .scene--right .card {
+    max-width: 95vw;
+    transform: translateY(36px) scale(0.97);
+  }
+  .scene--left .card.visible,
+  .scene--right .card.visible {
+    transform: translateY(0) scale(1);
+  }
+  .scene--left .stat-grid,
+  .scene--right .stat-grid,
+  .scene--left .project-grid,
+  .scene--right .project-grid,
+  .scene--left .speaking-grid,
+  .scene--right .speaking-grid,
+  .scene--left .awards-grid,
+  .scene--right .awards-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 600px) {
   .stat-grid, .project-grid, .speaking-grid, .awards-grid { grid-template-columns: 1fr; }
+  .scene--left .stat-grid,
+  .scene--right .stat-grid,
+  .scene--left .project-grid,
+  .scene--right .project-grid,
+  .scene--left .speaking-grid,
+  .scene--right .speaking-grid,
+  .scene--left .awards-grid,
+  .scene--right .awards-grid { grid-template-columns: 1fr; }
   .skill-grid { grid-template-columns: 1fr; }
   .dot-nav { display: none; }
   .hud__tr, .hud__br { display: none; }

@@ -1,442 +1,346 @@
 import * as THREE from 'three';
+import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-/* ═══════════════════════════════════════════════
-   PRABH.OS v2.0 — Cyberspace Interface · script.js
-   Three.js + WebGL · Particle systems · HUD logic
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   CYBERSPACE PORTFOLIO v3.0
+   Three.js + CSS3DRenderer + Post-processing
+   ═══════════════════════════════════════════════════ */
 
-const noMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let fps = 60;
+const State = {
+  scrollProgress: 0,
+  currentZone: 0,
+  hoveredCard: null,
+  mouseX: 0,
+  mouseY: 0,
+  fps: 60,
+};
+
+let scene, camera, webglRenderer, css3dRenderer, composer;
+let cardObjects = [];
+let particles = null;
+let cameraTarget = new THREE.Vector3();
 
 /* ── Boot Sequence ── */
-async function initBoot() {
-  const boot = document.getElementById('boot');
-  const terminal = document.getElementById('boot-terminal');
-  const bar = document.getElementById('boot-bar');
-  const status = document.getElementById('boot-status');
+async function boot() {
+  const bootEl = document.getElementById('boot-overlay');
+  const bootText = document.getElementById('boot-text');
+  const bootBar = document.getElementById('boot-bar');
 
   const lines = [
-    'INITIALIZING SYSTEM',
-    'LOADING MEMORY CACHE',
-    'ENGAGING NEURAL INTERFACE',
-    'PRABH.OS v2.0 READY',
-    'HANDSHAKE COMPLETE'
+    'INITIALIZING NEURAL INTERFACE...',
+    'LOADING CYBERSPACE BUFFER...',
+    'ESTABLISHING QUANTUM LINK...',
+    'PRABH.OS v3.0 READY',
+    'WELCOME TO THE VOID'
   ];
 
   for (const line of lines) {
-    const div = document.createElement('div');
-    div.className = 'boot__terminal-line';
-    div.textContent = line;
-    terminal.appendChild(div);
-    await new Promise(r => setTimeout(r, 200));
+    bootText.innerHTML += line + '<br>';
+    await sleep(300);
   }
 
-  gsap.to(bar, { width: '100%', duration: 1, ease: 'power2.inOut', delay: 0.3 });
+  gsap.to(bootBar, { width: '100%', duration: 0.8, ease: 'power2.inOut' });
+  await sleep(600);
 
-  await new Promise(r => setTimeout(r, 1400));
-  gsap.to(boot, {
+  gsap.to(bootEl, {
     opacity: 0,
-    yPercent: -100,
-    duration: 0.7,
-    ease: 'power3.inOut',
-    onComplete: () => { boot.style.display = 'none'; }
+    pointerEvents: 'none',
+    duration: 0.6,
+    ease: 'power3.inOut'
   });
 }
 
-/* ── Three.js Setup ── */
-function initThreeScene() {
-  const canvas = document.getElementById('webgl');
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setClearColor(0x000000, 1);
-  renderer.shadowMap.enabled = true;
+/* ── Initialize Three.js Scene ── */
+function initScene() {
+  // WebGL Renderer (for 3D)
+  const canvas = document.getElementById('canvas');
+  webglRenderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  webglRenderer.setSize(window.innerWidth, window.innerHeight);
+  webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  webglRenderer.setClearColor(0x000000, 1);
+  webglRenderer.shadowMap.enabled = true;
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2000);
-  camera.position.set(0, 40, 100);
-  camera.lookAt(0, 0, 0);
+  // Scene setup
+  scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x000000, 200, 1500);
 
-  /* Post-processing: Bloom */
-  const composer = new EffectComposer(renderer);
+  // Camera
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 1, 2000);
+  camera.position.set(0, 0, 800);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x0088ff, 0.4);
+  scene.add(ambientLight);
+
+  const pointLight = new THREE.PointLight(0x00ffff, 0.8, 800);
+  pointLight.position.set(200, 300, 400);
+  scene.add(pointLight);
+
+  // Post-processing
+  composer = new EffectComposer(webglRenderer);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
   const bloomPass = new UnrealBloomPass(
     new THREE.Vector2(window.innerWidth, window.innerHeight),
-    1.2,  /* strength */
-    0.4,  /* radius */
-    0.85  /* threshold */
+    1.5, 0.4, 0.85
   );
   composer.addPass(bloomPass);
 
-  /* Lights */
-  const ambLight = new THREE.AmbientLight(0x0088ff, 0.3);
-  scene.add(ambLight);
-
-  const pointLight = new THREE.PointLight(0x00ffff, 1, 500);
-  pointLight.position.set(100, 100, 100);
-  scene.add(pointLight);
-
-  /* Grid Floor */
-  const gridSize = 400;
+  // Grid floor
+  const gridGeo = new THREE.BufferGeometry();
+  const gridSize = 2000;
   const gridDivisions = 40;
-  const gridHelper = new THREE.GridHelper(gridSize, gridDivisions, 0xff006e, 0x333366);
-  gridHelper.position.y = -50;
-  scene.add(gridHelper);
+  const half = gridSize / 2;
 
-  /* Infinite grid effect via material */
-  const gridMat = gridHelper.material;
-  gridMat.color.set(0x00ffff);
-  gridMat.linewidth = 1;
-
-  /* Floating geometric shapes */
-  const geoShapes = [
-    createWireframeGeometry('icosahedron', 30, 0xff006e),
-    createWireframeGeometry('octahedron', 40, 0x00ffff),
-    createWireframeGeometry('tetrahedron', 25, 0xff8c00),
-    createWireframeGeometry('icosahedron', 35, 0xff006e),
-  ];
-
-  geoShapes[0].position.set(-80, 0, -100);
-  geoShapes[1].position.set(80, 20, -80);
-  geoShapes[2].position.set(-60, -20, 60);
-  geoShapes[3].position.set(60, 10, 80);
-
-  geoShapes.forEach((shape, i) => {
-    scene.add(shape);
-    // Subtle animation
-    shape.userData.speed = 0.3 + Math.random() * 0.3;
-    shape.userData.axis = new THREE.Vector3(
-      Math.random() - 0.5,
-      Math.random() - 0.5,
-      Math.random() - 0.5
-    ).normalize();
-  });
-
-  /* Particle Systems */
-  const particleLayers = [
-    createParticles(2000, 150, [0x00ffff, 0xff006e], 0.3),
-    createParticles(1500, 250, [0x00ffff, 0xff8c00], 0.5),
-    createParticles(1000, 350, [0xff006e, 0xffffff], 0.8),
-  ];
-
-  particleLayers.forEach((layer, i) => {
-    scene.add(layer.points);
-    layer.userData.index = i;
-  });
-
-  /* Window resize */
-  window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  /* Mouse parallax */
-  let mouseX = 0, mouseY = 0;
-  document.addEventListener('mousemove', e => {
-    mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-
-  /* Scroll-driven camera */
-  let scrollProgress = 0;
-  const cameraPath = [
-    new THREE.Vector3(0, 40, 100),
-    new THREE.Vector3(-30, 35, 80),
-    new THREE.Vector3(30, 38, 85),
-    new THREE.Vector3(-20, 42, 95),
-    new THREE.Vector3(40, 36, 75),
-    new THREE.Vector3(-40, 40, 90),
-    new THREE.Vector3(20, 35, 70),
-    new THREE.Vector3(0, 45, 110),
-  ];
-
-  window.addEventListener('scroll', () => {
-    const maxScroll = document.body.scrollHeight - window.innerHeight;
-    scrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-  });
-
-  /* Animation loop */
-  let frameCount = 0;
-  function animate() {
-    requestAnimationFrame(animate);
-    frameCount++;
-
-    /* Update camera position along path */
-    const pathIndex = Math.floor(scrollProgress * (cameraPath.length - 1));
-    const nextIndex = Math.min(pathIndex + 1, cameraPath.length - 1);
-    const t = scrollProgress * (cameraPath.length - 1) - pathIndex;
-    const pos = cameraPath[pathIndex].clone().lerp(cameraPath[nextIndex], t);
-    camera.position.lerp(pos, 0.05);
-    camera.lookAt(
-      mouseX * 20,
-      mouseY * 15,
-      0
-    );
-
-    /* Rotate floating shapes */
-    geoShapes.forEach(shape => {
-      shape.rotateOnWorldAxis(shape.userData.axis, shape.userData.speed * 0.01);
-    });
-
-    /* Animate particles */
-    particleLayers.forEach((layer, i) => {
-      layer.points.rotation.y += 0.0001 * (i + 1);
-      layer.points.rotation.x += 0.00005 * (i + 1);
-    });
-
-    /* Update HUD */
-    updateHUD(scrollProgress, camera);
-
-    /* Render */
-    composer.render();
-    updateFPS();
+  const positions = [];
+  for (let i = 0; i <= gridDivisions; i++) {
+    const x = -half + (i / gridDivisions) * gridSize;
+    positions.push(x, 0, -half, x, 0, half);
+    positions.push(-half, 0, x, half, 0, x);
   }
 
+  gridGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+  const gridMat = new THREE.LineBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.1 });
+  const grid = new THREE.LineSegments(gridGeo, gridMat);
+  scene.add(grid);
+
+  // Floating geometry
+  addFloatingGeometry();
+
+  // Particle system
+  particles = createParticles();
+  scene.add(particles);
+
+  // CSS3D Renderer (for HTML cards)
+  css3dRenderer = new CSS3DRenderer();
+  css3dRenderer.setSize(window.innerWidth, window.innerHeight);
+  css3dRenderer.domElement.style.position = 'absolute';
+  css3dRenderer.domElement.style.top = '0';
+  css3dRenderer.domElement.style.pointerEvents = 'none';
+  document.body.appendChild(css3dRenderer.domElement);
+
+  // Add cards to CSS3D space
+  setupCards();
+
+  // Handle resize
+  window.addEventListener('resize', onWindowResize);
+  window.addEventListener('scroll', onScroll);
+  document.addEventListener('mousemove', onMouseMove);
+
+  // Animation loop
   animate();
 }
 
-function createWireframeGeometry(type, size, color) {
-  let geo;
-  switch (type) {
-    case 'icosahedron':
-      geo = new THREE.IcosahedronGeometry(size, 2);
-      break;
-    case 'octahedron':
-      geo = new THREE.OctahedronGeometry(size, 2);
-      break;
-    case 'tetrahedron':
-      geo = new THREE.TetrahedronGeometry(size, 2);
-      break;
-    default:
-      geo = new THREE.IcosahedronGeometry(size, 2);
-  }
+function addFloatingGeometry() {
+  const geos = [
+    { geo: new THREE.IcosahedronGeometry(50, 3), color: 0xff00ff, pos: [-300, 100, -200] },
+    { geo: new THREE.OctahedronGeometry(60, 2), color: 0x00ffff, pos: [300, -50, -300] },
+    { geo: new THREE.TetrahedronGeometry(40, 2), color: 0xff00ff, pos: [-200, 200, 200] },
+  ];
 
-  const edges = new THREE.EdgesGeometry(geo);
-  const line = new THREE.LineSegments(
-    edges,
-    new THREE.LineBasicMaterial({ color, linewidth: 2 })
-  );
-  return line;
+  geos.forEach((item, i) => {
+    const edges = new THREE.EdgesGeometry(item.geo);
+    const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: item.color }));
+    line.position.set(...item.pos);
+    line.userData.rotSpeed = 0.001 + Math.random() * 0.002;
+    line.userData.axis = new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize();
+    scene.add(line);
+    line.userData.isGeo = true;
+  });
 }
 
-function createParticles(count, range, colors, opacity) {
+function createParticles() {
   const geo = new THREE.BufferGeometry();
+  const count = 1500;
   const pos = new Float32Array(count * 3);
   const cols = new Float32Array(count * 3);
-  const sizes = new Float32Array(count);
 
   for (let i = 0; i < count; i++) {
-    pos[i * 3] = (Math.random() - 0.5) * range * 2;
-    pos[i * 3 + 1] = (Math.random() - 0.5) * range * 2;
-    pos[i * 3 + 2] = (Math.random() - 0.5) * range * 2;
+    pos[i * 3] = (Math.random() - 0.5) * 1500;
+    pos[i * 3 + 1] = (Math.random() - 0.5) * 1200;
+    pos[i * 3 + 2] = (Math.random() - 0.5) * 1500;
 
-    const col = new THREE.Color(colors[Math.floor(Math.random() * colors.length)]);
-    cols[i * 3] = col.r;
-    cols[i * 3 + 1] = col.g;
-    cols[i * 3 + 2] = col.b;
-
-    sizes[i] = Math.random() * 2 + 1;
+    const c = Math.random() > 0.5 ? 0 : 1;
+    cols[i * 3] = c === 0 ? 0 : 1;       // R
+    cols[i * 3 + 1] = 1;                // G (always full for cyan/magenta)
+    cols[i * 3 + 2] = c === 0 ? 1 : 1;  // B
   }
 
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-  geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
   const mat = new THREE.PointsMaterial({
-    size: 1.5,
+    size: 2,
     sizeAttenuation: true,
     vertexColors: true,
     transparent: true,
-    opacity,
+    opacity: 0.6,
     depthWrite: false
   });
 
-  const points = new THREE.Points(geo, mat);
-  return { points, geo, mat };
+  return new THREE.Points(geo, mat);
 }
 
-/* ── HUD Updates ── */
-function updateHUD(progress, camera) {
-  const coords = document.getElementById('hud-coords');
-  const zone = document.getElementById('hud-zone');
-  const zoneIdx = document.getElementById('hud-zone-idx');
-  const percent = document.getElementById('hud-percent');
-  const progressFill = document.getElementById('hud-progress');
+function setupCards() {
+  const cardEls = document.querySelectorAll('.card');
+  const cardSpacing = 1000;
 
-  const zoneNum = Math.floor(progress * 8) + 1;
-  const zoneNames = ['IDENTITY', 'PROFILE', 'CAPABILITIES', 'ARCHIVE', 'TIMELINE', 'TRANSMISSIONS', 'CREDENTIALS', 'INTERFACE'];
-  zone.textContent = `— ${zoneNames[Math.min(zoneNum - 1, 7)]} —`;
-  zoneIdx.textContent = zoneNum.toString().padStart(2, '0');
+  cardEls.forEach((el, i) => {
+    const css3dObj = new CSS3DObject(el);
+    css3dObj.position.set(0, 0, -i * cardSpacing);
+    css3dObj.rotation.x = 0;
+    css3dObj.rotation.y = 0;
 
-  const pct = Math.round(progress * 100);
-  percent.textContent = pct.toString().padStart(3, '0');
-  progressFill.style.width = pct + '%';
+    scene.add(css3dObj);
+    cardObjects.push({
+      element: el,
+      object: css3dObj,
+      index: i,
+      targetRotation: { x: 0, y: 0 },
+      currentRotation: { x: 0, y: 0 }
+    });
 
-  coords.textContent = `+${(camera.position.x | 0).toString().padStart(4, '0')}.${(camera.position.z | 0).toString().padStart(3, '0')} / ${(camera.position.y | 0).toString().padStart(4, '0')}.000`;
+    el.addEventListener('mouseenter', () => {
+      State.hoveredCard = i;
+      el.style.zIndex = 10;
+    });
 
-  const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  document.getElementById('hud-time').textContent = timeStr + ' UTC';
-}
-
-/* ── Cursor ── */
-function initCursor() {
-  const cursor = document.getElementById('cursor');
-  document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
+    el.addEventListener('mouseleave', () => {
+      State.hoveredCard = null;
+      el.style.zIndex = 0;
+    });
   });
 }
 
-/* ── Smooth Scroll ── */
-function initLenis() {
-  if (typeof Lenis !== 'undefined') {
-    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-    gsap.ticker.add(t => lenis.raf(t * 1000));
-    gsap.ticker.lagSmoothing(0);
+/* ── Scroll Handler ── */
+function onScroll() {
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  State.scrollProgress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+
+  // Update HUD
+  const zoneIdx = Math.floor(State.scrollProgress * (cardObjects.length - 1));
+  State.currentZone = Math.min(zoneIdx, cardObjects.length - 1);
+
+  const zoneEl = document.querySelector('[data-zone]');
+  if (zoneEl) {
+    const zone = cardObjects[State.currentZone].element.dataset.zone;
+    document.getElementById('hud-zone').textContent = zone;
+    document.getElementById('hud-depth').textContent = (State.scrollProgress * 8000).toFixed(2);
+    document.getElementById('hud-bar').style.width = (State.scrollProgress * 100) + '%';
   }
 }
 
-/* ── Typed.js ── */
-function initTyped() {
-  if (typeof Typed === 'undefined') return;
-  new Typed('#typed', {
-    strings: [
-      'enterprise AI infrastructure.',
-      'Kubernetes platforms at Fortune 500 scale.',
-      'engineering orgs that ship.',
-      'cloud-native systems that last.',
-      'platforms powering $25B+ in revenue.'
-    ],
-    typeSpeed: 45,
-    backSpeed: 25,
-    backDelay: 2000,
-    loop: true,
-    smartBackspace: true,
+function onMouseMove(e) {
+  State.mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+  State.mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  // Custom cursor
+  document.documentElement.style.setProperty('--cursor-x', e.clientX + 'px');
+  document.documentElement.style.setProperty('--cursor-y', e.clientY + 'px');
+}
+
+/* ── Main Animation Loop ── */
+function animate() {
+  requestAnimationFrame(animate);
+
+  const time = Date.now() * 0.001;
+
+  // Update camera: fly through card positions based on scroll
+  const targetZ = -State.scrollProgress * 8000;
+  camera.position.z += (targetZ - camera.position.z) * 0.08;
+  camera.position.x = Math.sin(State.scrollProgress * Math.PI * 2) * 200;
+  camera.position.y = Math.cos(State.scrollProgress * Math.PI) * 150 + 200;
+
+  camera.lookAt(0, 0, targetZ);
+
+  // Update card positions & rotations
+  cardObjects.forEach((card, i) => {
+    card.object.position.z = -i * 1000;
+
+    // 3D hover effect
+    if (State.hoveredCard === i) {
+      card.targetRotation.x = State.mouseY * 0.1;
+      card.targetRotation.y = State.mouseX * 0.1;
+      card.object.scale.lerp(new THREE.Vector3(1.05, 1.05, 1.05), 0.1);
+    } else {
+      card.targetRotation.x = 0;
+      card.targetRotation.y = 0;
+      card.object.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
+    }
+
+    card.currentRotation.x += (card.targetRotation.x - card.currentRotation.x) * 0.08;
+    card.currentRotation.y += (card.targetRotation.y - card.currentRotation.y) * 0.08;
+    card.object.rotation.x = card.currentRotation.x;
+    card.object.rotation.y = card.currentRotation.y;
+
+    // Fade effect based on distance from camera
+    const dist = Math.abs(card.object.position.z - camera.position.z);
+    const opacity = Math.max(0.3, 1 - dist / 3000);
+    card.element.style.opacity = opacity;
   });
-}
 
-/* ── Stat Counters ── */
-function initCounters() {
-  let done = false;
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting && !done) {
-        done = true;
-        document.querySelectorAll('[data-target]').forEach(el => {
-          const target = +el.dataset.target;
-          const dur = 1600;
-          const t0 = performance.now();
-          (function tick(now) {
-            const p = Math.min((now - t0) / dur, 1);
-            const val = Math.floor((1 - Math.pow(1 - p, 3)) * target);
-            el.textContent = val.toLocaleString();
-            if (p < 1) requestAnimationFrame(tick);
-            else el.textContent = target.toLocaleString();
-          })(t0);
-        });
-      }
-    });
-  }, { threshold: 0.2 });
-
-  const profilePanel = document.querySelector('.panel--profile');
-  if (profilePanel) observer.observe(profilePanel);
-}
-
-/* ── Project Filter ── */
-function initProjectFilter() {
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const projCards = document.querySelectorAll('.proj-card');
-
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      const filter = btn.dataset.filter;
-      projCards.forEach(card => {
-        const tags = (card.dataset.tags || '').split(' ');
-        const show = filter === 'all' || tags.includes(filter);
-        card.style.display = show ? '' : 'none';
-        if (show && typeof gsap !== 'undefined') {
-          gsap.fromTo(card, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' });
-        }
-      });
-    });
+  // Animate floating geometry
+  scene.children.forEach(obj => {
+    if (obj.userData.isGeo) {
+      obj.rotateOnWorldAxis(obj.userData.axis, obj.userData.rotSpeed);
+    }
   });
+
+  // Animate particles
+  if (particles) {
+    particles.rotation.x += 0.0002;
+    particles.rotation.y += 0.0001;
+  }
+
+  // Render both WebGL and CSS3D
+  composer.render();
+  css3dRenderer.render(scene, camera);
 }
 
-/* ── Copy to Clipboard ── */
-function initCopy() {
-  const copyBtn = document.getElementById('copy-email');
-  if (!copyBtn) return;
-  copyBtn.addEventListener('click', e => {
-    e.preventDefault();
-    const email = 'prabh_simran@hotmail.com';
-    navigator.clipboard.writeText(email).then(() => {
-      const orig = copyBtn.textContent;
-      copyBtn.textContent = '[copied!]';
-      setTimeout(() => { copyBtn.textContent = orig; }, 1500);
+/* ── Helpers ── */
+function onWindowResize() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+
+  webglRenderer.setSize(w, h);
+  css3dRenderer.setSize(w, h);
+  composer.setSize(w, h);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+/* ── Copy Button ── */
+document.addEventListener('click', (e) => {
+  if (e.target.id === 'copy-btn') {
+    navigator.clipboard.writeText('prabh_simran@hotmail.com').then(() => {
+      const orig = e.target.textContent;
+      e.target.textContent = '[COPIED]';
+      setTimeout(() => { e.target.textContent = orig; }, 1500);
     });
-  });
-}
+  }
+});
 
-/* ── Panel Reveals ── */
-function initPanelReveals() {
-  gsap.registerPlugin(ScrollTrigger);
-  gsap.utils.toArray('.panel').forEach((panel, i) => {
-    gsap.from(panel, {
-      scrollTrigger: {
-        trigger: panel,
-        start: 'top 80%',
-        toggleActions: 'play none none none'
-      },
-      opacity: 0,
-      y: 30,
-      duration: 0.7,
-      delay: i * 0.1,
-      ease: 'power2.out'
-    });
-  });
-}
-
-/* ── FPS Counter ── */
-function updateFPS() {
-  const fpsEl = document.getElementById('hud-fps');
-  if (!fpsEl) return;
-  fpsEl.textContent = Math.round(1000 / (performance.now() % 1000 || 1));
-}
-
-/* ── Scroll Snap Sections ── */
-function initScrollSnap() {
-  document.querySelectorAll('[data-go]').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.getElementById(link.dataset.go);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
-    });
-  });
+/* ── Smooth Scroll ── */
+if (typeof Lenis !== 'undefined') {
+  const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+  gsap.ticker.add(t => lenis.raf(t * 1000));
 }
 
 /* ── Init ── */
-document.addEventListener('DOMContentLoaded', async () => {
-  await initBoot();
-  initThreeScene();
-  initCursor();
-  initLenis();
-  initTyped();
-  initCounters();
-  initProjectFilter();
-  initCopy();
-  initPanelReveals();
-  initScrollSnap();
+window.addEventListener('DOMContentLoaded', async () => {
+  await boot();
+  initScene();
+
+  // Set scroll height (number of cards * card spacing)
+  const cardCount = document.querySelectorAll('.card').length;
+  document.body.style.height = (cardCount * 1000) + 'px';
 });

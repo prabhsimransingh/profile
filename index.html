@@ -3,587 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRABH.OS // Cyberspace Interface</title>
-  <meta name="description" content="A 3D cyberspace portfolio interface for Prabh Singh — engineering executive, Kubernetes pioneer.">
+  <title>Prabh Singh — Cyberspace</title>
+  <meta name="description" content="Immersive 3D sci-fi portfolio with floating holographic interfaces.">
   <meta name="theme-color" content="#000000">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Three.js as ES module via importmap -->
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      "three": "https://unpkg.com/three@r160/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@r160/examples/jsm/"
     }
   }
   </script>
 </head>
 <body>
 
-<!-- ═══ Password Gate (inline so it runs first) ═══ -->
+<!-- Password Gate -->
 <script>
-(function () {
+(function() {
   const _k = 'UHJhYmhTaW5naDIwMjY=';
-  const _s = 'pg_auth';
-  if (sessionStorage.getItem(_s) === _k) return;
-  const input = prompt('🔐 Enter access code:');
-  if (input !== null && btoa(input) === _k) {
-    sessionStorage.setItem(_s, _k);
+  if (sessionStorage.getItem('_auth') === _k) return;
+  const input = prompt('Enter access code:');
+  if (input === null || btoa(input) !== _k) {
+    document.documentElement.innerHTML = '<body style="background:#000;color:#00ff00;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:1.2rem">ACCESS DENIED</body>';
   } else {
-    document.documentElement.innerHTML = '<body style="background:#000;color:#0ff;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh;font-size:1rem;letter-spacing:0.15em;flex-direction:column;gap:1rem;text-align:center;padding:2rem">// ACCESS DENIED<br><span style="color:#444;font-size:0.75rem;letter-spacing:0.2em">REFRESH TO RETRY</span></body>';
+    sessionStorage.setItem('_auth', _k);
   }
 })();
 </script>
 
-<!-- ═══ Boot Sequence Overlay ═══ -->
-<div id="boot">
-  <div class="boot__scanlines"></div>
-  <div class="boot__inner">
-    <div class="boot__logo">
-      <span class="boot__bracket boot__bracket--l">[</span>
-      <span class="boot__id">PRABH.OS</span>
-      <span class="boot__bracket boot__bracket--r">]</span>
-    </div>
-    <div class="boot__version">v2.0.260 — neural interface</div>
-    <div class="boot__terminal" id="boot-terminal"></div>
-    <div class="boot__bar-track"><div class="boot__bar" id="boot-bar"></div></div>
-    <div class="boot__status" id="boot-status">INITIALIZING</div>
+<!-- Boot Screen -->
+<div id="boot-overlay" class="boot">
+  <div class="boot__content">
+    <div class="boot__logo">PRABH.OS</div>
+    <div class="boot__text" id="boot-text"></div>
+    <div class="boot__progress"><div class="boot__bar" id="boot-bar"></div></div>
   </div>
 </div>
 
-<!-- ═══ Custom Cursor ═══ -->
-<div class="cursor" id="cursor">
-  <div class="cursor__line cursor__line--t"></div>
-  <div class="cursor__line cursor__line--r"></div>
-  <div class="cursor__line cursor__line--b"></div>
-  <div class="cursor__line cursor__line--l"></div>
-  <div class="cursor__dot"></div>
-</div>
+<!-- Three.js Canvas -->
+<canvas id="canvas"></canvas>
 
-<!-- ═══ Persistent HUD ═══ -->
-<div id="hud">
-  <!-- Top-left -->
-  <div class="hud__corner hud__tl">
-    <div class="hud__row hud__row--accent">PRABH.OS // v2.0</div>
-    <div class="hud__row">COORDS <span id="hud-coords">+0000.000 / -0000.000</span></div>
-    <div class="hud__row">UPLINK <span class="hud__online">▮ ONLINE</span></div>
+<!-- CSS3D Container (for floating content cards) -->
+<div id="css3d-container"></div>
+
+<!-- HUD Overlay -->
+<div class="hud">
+  <div class="hud__top-left">
+    <div class="hud__line">PRABH.OS v3.0</div>
+    <div class="hud__line">STATUS: <span class="hud__online">ONLINE</span></div>
+    <div class="hud__line">DEPTH: <span id="hud-depth">0000.00</span></div>
   </div>
-
-  <!-- Top-right -->
-  <div class="hud__corner hud__tr">
-    <div class="hud__row hud__row--accent" id="hud-time">--:--:-- UTC</div>
-    <div class="hud__row">SIGNAL <span class="hud__bars">▮▮▮▮▮</span></div>
-    <div class="hud__row">FRAME <span id="hud-fps">60</span></div>
-  </div>
-
-  <!-- Bottom-left -->
-  <div class="hud__corner hud__bl">
-    <div class="hud__zone-label">CURRENT ZONE</div>
-    <div class="hud__zone-name" id="hud-zone">— IDENTITY —</div>
-    <div class="hud__zone-idx"><span id="hud-zone-idx">01</span> / 08</div>
-  </div>
-
-  <!-- Bottom-right -->
-  <div class="hud__corner hud__br">
-    <div class="hud__progress-label">DESCENT</div>
-    <div class="hud__progress-track">
-      <div class="hud__progress-fill" id="hud-progress"></div>
-    </div>
-    <div class="hud__progress-val"><span id="hud-percent">000</span>%</div>
-  </div>
-
-  <!-- Center crosshair -->
-  <div class="hud__center">
-    <div class="hud__center-mark hud__center-mark--t"></div>
-    <div class="hud__center-mark hud__center-mark--r"></div>
-    <div class="hud__center-mark hud__center-mark--b"></div>
-    <div class="hud__center-mark hud__center-mark--l"></div>
+  <div class="hud__bottom-right">
+    <div class="hud__line"><span id="hud-zone">IDENTITY</span></div>
+    <div class="hud__progress"><div class="hud__progress-bar" id="hud-bar"></div></div>
   </div>
 </div>
 
-<!-- ═══ WebGL Canvas ═══ -->
-<canvas id="webgl"></canvas>
-<div id="vignette"></div>
-<div id="grain"></div>
+<!-- Glitch Overlay -->
+<div class="glitch-overlay" id="glitch"></div>
 
-<!-- ═══ Scroll-Driven Content Stations ═══ -->
-<main id="stations">
+<!-- Content (as CSS3D objects) -->
+<div id="content" style="display: none;">
 
-  <!-- STATION 1: IDENTITY -->
-  <section class="station" data-zone="IDENTITY" data-idx="01">
-    <div class="panel panel--hero">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
-
-      <div class="panel__label">[ 01 // IDENTITY ]</div>
-      <h1 class="hero-name">
-        <span class="hero-name__glitch" data-text="PRABH">PRABH</span>
-        <span class="hero-name__glitch hero-name__glitch--alt" data-text="SINGH">SINGH</span>
-      </h1>
-      <div class="hero-sub">
-        <span class="hero-sub__prompt">&gt;</span>
-        Building <span class="hero-sub__typed" id="typed"></span><span class="hero-sub__caret"></span>
-      </div>
-      <p class="hero-desc">
-        Engineering executive · Kubernetes pioneer · Built platforms running
-        <span class="hl">$25B+ of Salesforce's ARR</span>. Currently architecting AI data
-        infrastructure at NetApp.
-      </p>
-      <div class="hero-cta">
-        <a href="#archive" class="btn-holo" data-go="archive">
-          <span>ENTER ARCHIVE</span>
-          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-        </a>
-        <a href="mailto:prabh_simran@hotmail.com" class="btn-holo btn-holo--ghost">
-          <span>OPEN CHANNEL</span>
-        </a>
-      </div>
-      <div class="hero-meta">
-        <span>FREMONT_CA</span>
-        <span class="hero-meta__sep">//</span>
-        <span>EXP_15Y</span>
-        <span class="hero-meta__sep">//</span>
-        <span>STATUS_AVAILABLE</span>
+  <!-- CARD 1: HERO/IDENTITY -->
+  <div class="card card--hero" data-position="0" data-zone="IDENTITY">
+    <div class="card__inner">
+      <div class="card__label">[ IDENTITY ]</div>
+      <h1 class="card__title">PRABH SINGH</h1>
+      <p class="card__subtitle">Engineering Executive · Kubernetes Pioneer</p>
+      <p class="card__text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI data infrastructure at NetApp. Dual MS from CMU.</p>
+      <div class="card__meta">
+        <span>15+ years</span>
+        <span>•</span>
+        <span>100+ engineers led</span>
+        <span>•</span>
+        <span>3 patents</span>
       </div>
     </div>
+  </div>
 
-    <div class="station__hint">
-      <div class="station__hint-line"></div>
-      <span>SCROLL TO DESCEND</span>
+  <!-- CARD 2: PROFILE -->
+  <div class="card" data-position="1" data-zone="PROFILE">
+    <div class="card__inner">
+      <div class="card__label">[ PROFILE ]</div>
+      <h2 class="card__title">SYSTEM OPERATOR</h2>
+      <p class="card__text">Among the first to run Kubernetes in Fortune 500 production (2015–16). Built the platform underpinning Salesforce's largest infrastructure project.</p>
+      <div class="card__stats">
+        <div class="stat"><span class="stat__val">1,800+</span><span class="stat__label">Services @ 99.99% SLA</span></div>
+        <div class="stat"><span class="stat__val">$74B</span><span class="stat__label">Assets on Platform</span></div>
+      </div>
     </div>
-  </section>
+  </div>
 
-  <!-- STATION 2: PROFILE -->
-  <section class="station" data-zone="PROFILE" data-idx="02">
-    <div class="panel panel--profile">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
+  <!-- CARD 3: SKILLS -->
+  <div class="card" data-position="2" data-zone="CAPABILITIES">
+    <div class="card__inner">
+      <div class="card__label">[ CAPABILITIES ]</div>
+      <h2 class="card__title">TECHNICAL DEPTH</h2>
+      <div class="card__skills">
+        <span class="skill">Kubernetes</span>
+        <span class="skill">Python</span>
+        <span class="skill">Go</span>
+        <span class="skill">TypeScript</span>
+        <span class="skill">AWS</span>
+        <span class="skill">GCP</span>
+        <span class="skill">Terraform</span>
+        <span class="skill">AI Agents</span>
+        <span class="skill">Microservices</span>
+        <span class="skill">Zero Trust</span>
+      </div>
+    </div>
+  </div>
 
-      <div class="panel__label">[ 02 // PROFILE ]</div>
-      <h2 class="panel__heading">SYSTEM <span class="grad">OPERATOR</span></h2>
-
-      <div class="profile__grid">
-        <div class="profile__avatar">
-          <div class="profile__avatar-frame">
-            <img src="assets/avatar.png" alt="Prabh Singh" onerror="this.parentElement.classList.add('no-img')">
-            <div class="profile__avatar-scan"></div>
-            <div class="profile__avatar-corners">
-              <span></span><span></span><span></span><span></span>
-            </div>
-          </div>
-          <div class="profile__avatar-tag">
-            <span class="dot dot--live"></span> LIVE FEED // OPERATOR ACTIVE
-          </div>
+  <!-- CARD 4: PROJECTS -->
+  <div class="card" data-position="3" data-zone="ARCHIVE">
+    <div class="card__inner">
+      <div class="card__label">[ ARCHIVE ]</div>
+      <h2 class="card__title">FEATURED PROJECTS</h2>
+      <div class="card__projects">
+        <div class="project">
+          <div class="project__name">ApplyPilot</div>
+          <div class="project__desc">AI job application pipeline with Claude API + Playwright</div>
+          <div class="project__tags"><span>Python</span><span>AI</span></div>
         </div>
-
-        <div class="profile__data">
-          <p class="profile__bio">
-            Built the Kubernetes platform underpinning <strong>$25 billion in Salesforce ARR</strong>
-            — one of the largest cloud-native infrastructure projects in enterprise software
-            history. Among the first to run Kubernetes in Fortune 500 production (2015–16).
-          </p>
-          <p class="profile__bio">
-            Currently driving AI data infrastructure at <strong>NetApp</strong>. Dual Master's
-            from <strong>Carnegie Mellon University</strong>.
-          </p>
-
-          <div class="profile__stats">
-            <div class="stat-block">
-              <div class="stat-block__val"><span data-target="15">0</span>+</div>
-              <div class="stat-block__lbl">years_at_scale</div>
-            </div>
-            <div class="stat-block">
-              <div class="stat-block__val"><span data-target="1800">0</span>+</div>
-              <div class="stat-block__lbl">services_99.99%_sla</div>
-            </div>
-            <div class="stat-block">
-              <div class="stat-block__val"><span data-target="100">0</span>+</div>
-              <div class="stat-block__lbl">engineers_led</div>
-            </div>
-            <div class="stat-block">
-              <div class="stat-block__val">3</div>
-              <div class="stat-block__lbl">patents_filed</div>
-            </div>
-          </div>
+        <div class="project">
+          <div class="project__name">Job Apply Bot</div>
+          <div class="project__desc">End-to-end LinkedIn + Indeed automation</div>
+          <div class="project__tags"><span>Python</span><span>AI</span></div>
+        </div>
+        <div class="project">
+          <div class="project__name">CricManager</div>
+          <div class="project__desc">Full-stack cricket club platform</div>
+          <div class="project__tags"><span>React</span><span>Node</span></div>
+        </div>
+        <div class="project">
+          <div class="project__name">Budget Tracker</div>
+          <div class="project__desc">AI-powered personal finance OS</div>
+          <div class="project__tags"><span>TypeScript</span><span>Next.js</span></div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- STATION 3: CAPABILITIES -->
-  <section class="station" data-zone="CAPABILITIES" data-idx="03">
-    <div class="panel panel--wide">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
-
-      <div class="panel__label">[ 03 // CAPABILITIES ]</div>
-      <h2 class="panel__heading">TECHNICAL <span class="grad">DEPTH</span></h2>
-
-      <div class="caps__cluster">
-        <div class="caps__node caps__node--core">
-          <div class="caps__node-inner">PRABH<br><span>CORE</span></div>
-          <div class="caps__node-pulse"></div>
+  <!-- CARD 5: CAREER -->
+  <div class="card" data-position="4" data-zone="TIMELINE">
+    <div class="card__inner">
+      <div class="card__label">[ TIMELINE ]</div>
+      <h2 class="card__title">CAREER LOG</h2>
+      <div class="card__timeline">
+        <div class="tl-entry">
+          <div class="tl-year">2023—NOW</div>
+          <div class="tl-role">Senior Director · AI Data Infrastructure</div>
+          <div class="tl-org">NetApp</div>
         </div>
-        <div class="caps__orbit">
-          <div class="caps__chip" style="--a:0deg">KUBERNETES</div>
-          <div class="caps__chip" style="--a:36deg">PYTHON</div>
-          <div class="caps__chip" style="--a:72deg">GO</div>
-          <div class="caps__chip" style="--a:108deg">TYPESCRIPT</div>
-          <div class="caps__chip" style="--a:144deg">AWS</div>
-          <div class="caps__chip" style="--a:180deg">GCP</div>
-          <div class="caps__chip" style="--a:216deg">AZURE</div>
-          <div class="caps__chip" style="--a:252deg">TERRAFORM</div>
-          <div class="caps__chip" style="--a:288deg">KAFKA</div>
-          <div class="caps__chip" style="--a:324deg">LLM_OPS</div>
+        <div class="tl-entry">
+          <div class="tl-year">2015—2023</div>
+          <div class="tl-role">Principal Engineer → Senior Director</div>
+          <div class="tl-org">Salesforce</div>
         </div>
-      </div>
-
-      <div class="caps__tags">
-        <span class="caps__tag">DOCKER</span>
-        <span class="caps__tag">CI/CD</span>
-        <span class="caps__tag">POSTGRESQL</span>
-        <span class="caps__tag">REDIS</span>
-        <span class="caps__tag">PROMETHEUS</span>
-        <span class="caps__tag">GRAFANA</span>
-        <span class="caps__tag">AI_AGENTS</span>
-        <span class="caps__tag">MICROSERVICES</span>
-        <span class="caps__tag">ZERO_TRUST</span>
-        <span class="caps__tag">SERVICE_MESH</span>
-        <span class="caps__tag">GITOPS</span>
-        <span class="caps__tag">EVENT_DRIVEN</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- STATION 4: ARCHIVE (projects) -->
-  <section class="station" id="archive" data-zone="ARCHIVE" data-idx="04">
-    <div class="panel panel--wide">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
-
-      <div class="panel__label">[ 04 // ARCHIVE ]</div>
-      <h2 class="panel__heading">FEATURED <span class="grad">PROJECTS</span></h2>
-
-      <div class="archive__filters">
-        <button class="filter-btn active" data-filter="all">ALL</button>
-        <button class="filter-btn" data-filter="python">PYTHON</button>
-        <button class="filter-btn" data-filter="typescript">TYPESCRIPT</button>
-        <button class="filter-btn" data-filter="web">WEB</button>
-        <button class="filter-btn" data-filter="ai">AI</button>
-      </div>
-
-      <div class="archive__grid">
-        <a class="proj-card" data-tags="python ai" href="https://github.com/prabhsimransingh" target="_blank">
-          <div class="proj-card__hex"></div>
-          <div class="proj-card__head">
-            <span class="proj-card__id">// 001</span>
-            <span class="proj-card__lang">PY · AI</span>
-          </div>
-          <div class="proj-card__name">APPLYPILOT</div>
-          <div class="proj-card__desc">AI-powered job application pipeline. Parses job specs, tailors resumes, generates cover letters, auto-submits via Playwright.</div>
-          <div class="proj-card__pills">
-            <span>CLAUDE_API</span><span>PLAYWRIGHT</span><span>FASTAPI</span>
-          </div>
-          <div class="proj-card__cta">VIEW_SOURCE →</div>
-        </a>
-
-        <a class="proj-card" data-tags="python ai" href="https://github.com/prabhsimransingh" target="_blank">
-          <div class="proj-card__hex"></div>
-          <div class="proj-card__head">
-            <span class="proj-card__id">// 002</span>
-            <span class="proj-card__lang">PY · AI</span>
-          </div>
-          <div class="proj-card__name">JOB_APPLY_BOT</div>
-          <div class="proj-card__desc">End-to-end automation of LinkedIn + Indeed applications. Claude AI for smart form completion. Playwright for browser orchestration.</div>
-          <div class="proj-card__pills">
-            <span>CLAUDE</span><span>PLAYWRIGHT</span><span>LINKEDIN_API</span>
-          </div>
-          <div class="proj-card__cta">VIEW_SOURCE →</div>
-        </a>
-
-        <a class="proj-card" data-tags="web js" href="https://github.com/prabhsimransingh" target="_blank">
-          <div class="proj-card__hex"></div>
-          <div class="proj-card__head">
-            <span class="proj-card__id">// 003</span>
-            <span class="proj-card__lang">WEB · JS</span>
-          </div>
-          <div class="proj-card__name">CRICMANAGER</div>
-          <div class="proj-card__desc">Full-stack cricket club platform — live scoring, player stats, match scheduling, Instagram auto-poster for match highlights.</div>
-          <div class="proj-card__pills">
-            <span>REACT</span><span>NODE</span><span>POSTGRES</span>
-          </div>
-          <div class="proj-card__cta">VIEW_SOURCE →</div>
-        </a>
-
-        <a class="proj-card" data-tags="typescript web" href="https://github.com/prabhsimransingh" target="_blank">
-          <div class="proj-card__hex"></div>
-          <div class="proj-card__head">
-            <span class="proj-card__id">// 004</span>
-            <span class="proj-card__lang">TS</span>
-          </div>
-          <div class="proj-card__name">BUDGET_TRACKER</div>
-          <div class="proj-card__desc">Personal finance OS with AI-driven categorization, trend analysis, and predictive savings recommendations.</div>
-          <div class="proj-card__pills">
-            <span>TYPESCRIPT</span><span>NEXT_JS</span><span>PRISMA</span>
-          </div>
-          <div class="proj-card__cta">VIEW_SOURCE →</div>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- STATION 5: TIMELINE -->
-  <section class="station" data-zone="TIMELINE" data-idx="05">
-    <div class="panel panel--wide">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
-
-      <div class="panel__label">[ 05 // TIMELINE ]</div>
-      <h2 class="panel__heading">CAREER <span class="grad">LOG</span></h2>
-
-      <div class="tl">
-        <div class="tl__line"></div>
-        <div class="tl__entry">
-          <div class="tl__node"></div>
-          <div class="tl__card">
-            <div class="tl__period">2023 — PRESENT</div>
-            <div class="tl__role">Senior Director · AI Data Infrastructure</div>
-            <div class="tl__org">NetApp // Fremont CA</div>
-            <ul class="tl__bullets">
-              <li>Building AI-native data infrastructure eliminating brittle enterprise pipelines</li>
-              <li>Leading cross-functional teams shipping cloud-native storage and AI integrations</li>
-              <li>Driving open-source contributions across the Kubernetes ecosystem</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="tl__entry">
-          <div class="tl__node"></div>
-          <div class="tl__card">
-            <div class="tl__period">2015 — 2023</div>
-            <div class="tl__role">Principal Engineer → Senior Director</div>
-            <div class="tl__org">Salesforce // San Francisco CA</div>
-            <ul class="tl__bullets">
-              <li>Architected Kubernetes platform powering $25B+ ARR across 1,800+ microservices</li>
-              <li>Among the first to run Kubernetes in Fortune 500 production at scale (2015–16)</li>
-              <li>Filed 3 patents in distributed systems and container orchestration</li>
-              <li>Led 100+ engineers across infrastructure, platform, and AI orgs</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="tl__entry">
-          <div class="tl__node"></div>
-          <div class="tl__card">
-            <div class="tl__period">2013 — 2015</div>
-            <div class="tl__role">Master of Science · Information Systems</div>
-            <div class="tl__org">Carnegie Mellon University</div>
-            <ul class="tl__bullets">
-              <li>Dual MS: Information Systems + Business Intelligence</li>
-            </ul>
-          </div>
+        <div class="tl-entry">
+          <div class="tl-year">2013—2015</div>
+          <div class="tl-role">Master of Science</div>
+          <div class="tl-org">Carnegie Mellon University</div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- STATION 6: TRANSMISSIONS (speaking + publications) -->
-  <section class="station" data-zone="TRANSMISSIONS" data-idx="06">
-    <div class="panel panel--wide">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
-
-      <div class="panel__label">[ 06 // TRANSMISSIONS ]</div>
-      <h2 class="panel__heading">SPEAKING + <span class="grad">PUBLICATIONS</span></h2>
-
-      <div class="trans__sub">// ON_STAGE</div>
-      <div class="trans__speaking">
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-3.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">NVIDIA_GTC_2025</span>
-            <div class="speak-tile__title">AI Infrastructure at Scale</div>
-            <div class="speak-tile__loc">WASHINGTON_DC · MAR_2025</div>
-          </div>
-        </div>
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-5.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">NETAPP_INSIGHT_2025</span>
-            <div class="speak-tile__title">Intelligent Data Pipelines for the AI Era</div>
-            <div class="speak-tile__loc">LAS_VEGAS · 2025</div>
-          </div>
-        </div>
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-1.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">KUBECON_EU_2024</span>
-            <div class="speak-tile__title">Representing NetApp at KubeCon Europe</div>
-            <div class="speak-tile__loc">PARIS · MAR_2024</div>
-          </div>
-        </div>
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-4.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">NETAPP_INSIGHT_2024</span>
-            <div class="speak-tile__title">Synthetic Testing Framework for Cloud-Native</div>
-            <div class="speak-tile__loc">2024</div>
-          </div>
-        </div>
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-7.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">AWS_ROUNDTABLE</span>
-            <div class="speak-tile__title">Container Strategy for Enterprise Kubernetes</div>
-            <div class="speak-tile__loc">AWS_CONTAINER_RT</div>
-          </div>
-        </div>
-        <div class="speak-tile">
-          <img src="assets/speaking/speaking-2.jpg" alt="" onerror="this.style.display='none'">
-          <div class="speak-tile__body">
-            <span class="speak-tile__venue">GOOGLE_KUBECAMP</span>
-            <div class="speak-tile__title">Kubernetes at Fortune 500 — Lessons from the Trenches</div>
-            <div class="speak-tile__loc">GOOGLE</div>
-          </div>
-        </div>
+  <!-- CARD 6: SPEAKING -->
+  <div class="card" data-position="5" data-zone="TRANSMISSIONS">
+    <div class="card__inner">
+      <div class="card__label">[ TRANSMISSIONS ]</div>
+      <h2 class="card__title">SPEAKING + PUBS</h2>
+      <div class="card__speaking">
+        <div class="speak"><strong>NVIDIA GTC 2025</strong> — AI Infrastructure at Scale</div>
+        <div class="speak"><strong>KubeCon EU 2024</strong> — Representing NetApp</div>
+        <div class="speak"><strong>NetApp INSIGHT</strong> — Data Guardrails for AI</div>
       </div>
-
-      <div class="trans__sub trans__sub--mt">// PUBLICATIONS</div>
-      <div class="trans__pubs">
-        <a class="pub-row" href="https://medium.com/intelligent-data-insights/stop-rebuilding-the-same-ai-data-pipeline-over-and-over-1402854206de" target="_blank">
-          <span class="pub-row__tag">MEDIUM</span>
-          <span class="pub-row__title">Stop Rebuilding the Same AI Data Pipeline Over and Over</span>
-          <span class="pub-row__arrow">↗</span>
-        </a>
-        <a class="pub-row" href="https://community.netapp.com/t5/Tech-ONTAP-Blogs/Revolutionizing-Data-Guardrails-for-AI-Pipelines/ba-p/454757" target="_blank">
-          <span class="pub-row__tag">NETAPP</span>
-          <span class="pub-row__title">Revolutionizing Data Guardrails for AI Pipelines</span>
-          <span class="pub-row__arrow">↗</span>
-        </a>
-        <a class="pub-row" href="https://tfir.io/synthetic-testing-framework" target="_blank">
-          <span class="pub-row__tag">TFIR.IO</span>
-          <span class="pub-row__title">Synthetic Testing Framework for Cloud-Native Applications</span>
-          <span class="pub-row__arrow">↗</span>
-        </a>
-        <a class="pub-row" href="https://github.com/salesforce/kube-synthetic-scaler" target="_blank">
-          <span class="pub-row__tag">GITHUB</span>
-          <span class="pub-row__title">kube-synthetic-scaler — open source Kubernetes autoscaler</span>
-          <span class="pub-row__arrow">↗</span>
-        </a>
+      <div class="card__pubs">
+        <div class="pub"><strong>Medium:</strong> Stop Rebuilding the Same AI Pipeline</div>
+        <div class="pub"><strong>NetApp:</strong> Revolutionizing Data Guardrails</div>
+        <div class="pub"><strong>GitHub:</strong> kube-synthetic-scaler (open source)</div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- STATION 7: CREDENTIALS -->
-  <section class="station" data-zone="CREDENTIALS" data-idx="07">
-    <div class="panel panel--wide">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
+  <!-- CARD 7: AWARDS -->
+  <div class="card" data-position="6" data-zone="CREDENTIALS">
+    <div class="card__inner">
+      <div class="card__label">[ CREDENTIALS ]</div>
+      <h2 class="card__title">AWARDS & CERTS</h2>
+      <div class="card__creds">
+        <div class="cred"><span class="cred__year">2024</span> Salesforce 5-Year Award</div>
+        <div class="cred"><span class="cred__year">2022</span> Salesforce 3-Year Award</div>
+        <div class="cred"><span class="cred__year">FY21</span> Best Tech Talk Series</div>
+        <div class="cred"><span class="cred__year">2019</span> Certified ScrumMaster</div>
+      </div>
+    </div>
+  </div>
 
-      <div class="panel__label">[ 07 // CREDENTIALS ]</div>
-      <h2 class="panel__heading">AWARDS · <span class="grad">CERTS</span></h2>
-
-      <div class="creds__grid">
-        <div class="cred-card">
-          <div class="cred-card__img"><img src="assets/awards/scrummaster-cert-enhanced.jpg" alt=""></div>
-          <div class="cred-card__year">2019</div>
-          <div class="cred-card__title">CERTIFIED SCRUMMASTER</div>
+  <!-- CARD 8: CONTACT -->
+  <div class="card card--contact" data-position="7" data-zone="INTERFACE">
+    <div class="card__inner">
+      <div class="card__label">[ INTERFACE ]</div>
+      <h2 class="card__title">ESTABLISH CHANNEL</h2>
+      <p class="card__text">Open to senior engineering leadership, advisory work, and speaking engagements.</p>
+      <div class="card__contact">
+        <div class="contact-item">
+          <div class="contact-label">EMAIL</div>
+          <div class="contact-value">prabh_simran@hotmail.com</div>
+          <button class="contact-copy" id="copy-btn">[COPY]</button>
         </div>
-        <div class="cred-card">
-          <div class="cred-card__img"><img src="assets/awards/tech-talkie-2021-clean.png" alt=""></div>
-          <div class="cred-card__year">FY21</div>
-          <div class="cred-card__title">BEST TECH TALK SERIES</div>
+        <div class="contact-item">
+          <div class="contact-label">LOCATION</div>
+          <div class="contact-value">Fremont, CA · Open to Remote</div>
         </div>
-        <div class="cred-card">
-          <div class="cred-card__img"><img src="assets/awards/salesforce-3yr-clean.png" alt=""></div>
-          <div class="cred-card__year">2022</div>
-          <div class="cred-card__title">SALESFORCE · 3 YEAR</div>
-        </div>
-        <div class="cred-card">
-          <div class="cred-card__img"><img src="assets/awards/salesforce-5yr-enhanced.jpg" alt=""></div>
-          <div class="cred-card__year">2024</div>
-          <div class="cred-card__title">SALESFORCE · 5 YEAR</div>
+        <div class="contact-links">
+          <a href="https://linkedin.com/in/prabhssingh" target="_blank">LinkedIn</a>
+          <a href="https://github.com/prabhsimransingh" target="_blank">GitHub</a>
+          <a href="https://medium.com/@prabhsingh" target="_blank">Medium</a>
         </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <!-- STATION 8: INTERFACE -->
-  <section class="station" data-zone="INTERFACE" data-idx="08">
-    <div class="panel panel--terminal">
-      <div class="panel__corner panel__corner--tl"></div>
-      <div class="panel__corner panel__corner--tr"></div>
-      <div class="panel__corner panel__corner--bl"></div>
-      <div class="panel__corner panel__corner--br"></div>
+</div>
 
-      <div class="terminal__bar">
-        <span class="terminal__dot terminal__dot--r"></span>
-        <span class="terminal__dot terminal__dot--y"></span>
-        <span class="terminal__dot terminal__dot--g"></span>
-        <span class="terminal__title">prabh@cyberspace ~ open_channel</span>
-      </div>
-
-      <div class="panel__label">[ 08 // INTERFACE ]</div>
-      <h2 class="panel__heading">ESTABLISH <span class="grad">CHANNEL</span></h2>
-      <p class="terminal__sub">// Open to senior engineering leadership, advisory work, speaking engagements.</p>
-
-      <div class="terminal__lines">
-        <div class="t-line"><span class="t-prompt">$</span> cat ./contact.json</div>
-        <div class="t-line t-line--out">
-{
-  "name":      <span class="t-str">"Prabh Singh"</span>,
-  "email":     <span class="t-str">"prabh_simran@hotmail.com"</span> <button class="t-copy" id="copy-email">[copy]</button>,
-  "location":  <span class="t-str">"Fremont, CA"</span>,
-  "available": <span class="t-bool">true</span>,
-  "remote":    <span class="t-bool">true</span>
-}</div>
-        <div class="t-line"><span class="t-prompt">$</span> echo $SOCIALS | jq</div>
-      </div>
-
-      <div class="terminal__socials">
-        <a href="https://linkedin.com/in/prabhssingh" target="_blank" class="t-link">→ /linkedin</a>
-        <a href="https://github.com/prabhsimransingh" target="_blank" class="t-link">→ /github</a>
-        <a href="https://medium.com/@prabhsingh" target="_blank" class="t-link">→ /medium</a>
-        <a href="mailto:prabh_simran@hotmail.com" class="t-link">→ /mail</a>
-      </div>
-    </div>
-
-    <div class="station__footer">
-      <span>END_OF_TRANSMISSION</span>
-      <span class="station__footer-sep">//</span>
-      <span>PRABH.OS v2.0</span>
-      <span class="station__footer-sep">//</span>
-      <span>2025</span>
-    </div>
-  </section>
-
-</main>
-
-<!-- Libraries -->
+<!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.1.0/typed.umd.js"></script>
-
-<!-- Main script as ES module -->
 <script type="module" src="script.js"></script>
 
 </body>

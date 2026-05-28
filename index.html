@@ -22,10 +22,7 @@
 })();
 </script>
 
-<!-- Fixed 3D Background -->
 <canvas id="renderCanvas"></canvas>
-
-<!-- Scan-line overlay for extra sci-fi depth -->
 <div class="scanlines"></div>
 
 <!-- Boot Screen -->
@@ -38,24 +35,16 @@
   </div>
 </div>
 
-<!-- HUD (always on top) -->
+<!-- HUD -->
 <div class="hud">
-  <div class="hud__tl">
-    <span class="hud__dot"></span>ONLINE
-  </div>
-  <div class="hud__tr">
-    <span id="section-counter">01 / 08</span>
-  </div>
-  <div class="hud__bl">
-    <span id="zone">IDENTITY</span>
-  </div>
+  <div class="hud__tl"><span class="hud__dot"></span>ONLINE</div>
+  <div class="hud__tr"><span id="section-counter">01 / 08</span></div>
+  <div class="hud__bl"><span id="zone">IDENTITY</span></div>
   <div class="hud__br">PRABH.OS v3.0</div>
 </div>
 
-<!-- Scroll Progress Bar -->
 <div class="scroll-progress"><div id="progress-bar"></div></div>
 
-<!-- Navigation dots -->
 <nav class="dot-nav">
   <button class="dot active" data-idx="0" title="Identity"></button>
   <button class="dot" data-idx="1" title="Profile"></button>
@@ -67,38 +56,53 @@
   <button class="dot" data-idx="7" title="Interface"></button>
 </nav>
 
-<!-- Sections — each 100vh, card appears centered -->
 <main>
 
-  <!-- SECTION 1: IDENTITY -->
+  <!-- 01: IDENTITY — two-column with avatar -->
   <section class="scene" data-zone="IDENTITY" data-idx="0">
-    <div class="card" data-variant="hero">
+    <div class="card card--hero">
       <div class="card__glow"></div>
       <div class="card__border"></div>
-      <div class="card__inner">
-        <div class="label">[ IDENTITY ]</div>
-        <h1>PRABH<br>SINGH</h1>
-        <p class="subtitle">Engineering Executive · Kubernetes Pioneer</p>
-        <p class="body-text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce.<br>Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
-        <div class="meta-row">
-          <div class="meta-badge"><span class="meta-val">15+</span><span class="meta-lbl">Years</span></div>
-          <div class="meta-badge"><span class="meta-val">100+</span><span class="meta-lbl">Engineers</span></div>
-          <div class="meta-badge"><span class="meta-val">3</span><span class="meta-lbl">Patents</span></div>
-          <div class="meta-badge"><span class="meta-val">$25B+</span><span class="meta-lbl">ARR Built</span></div>
+      <div class="card__inner card__inner--split">
+
+        <div class="split__text">
+          <div class="label">[ IDENTITY ]</div>
+          <h1>PRABH<br>SINGH</h1>
+          <p class="subtitle">Engineering Executive · Kubernetes Pioneer</p>
+          <p class="body-text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
+          <div class="meta-row">
+            <div class="meta-badge"><span class="meta-val">15+</span><span class="meta-lbl">Years</span></div>
+            <div class="meta-badge"><span class="meta-val">100+</span><span class="meta-lbl">Engineers</span></div>
+            <div class="meta-badge"><span class="meta-val">3</span><span class="meta-lbl">Patents</span></div>
+            <div class="meta-badge"><span class="meta-val">$25B+</span><span class="meta-lbl">ARR Built</span></div>
+          </div>
         </div>
+
+        <div class="split__photo">
+          <div class="avatar-frame">
+            <img src="assets/avatar.jpg" alt="Prabh Singh" class="avatar-img"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+            <div class="avatar-fallback" style="display:none">PS</div>
+            <div class="avatar-ring avatar-ring--1"></div>
+            <div class="avatar-ring avatar-ring--2"></div>
+            <div class="avatar-corner avatar-corner--tl"></div>
+            <div class="avatar-corner avatar-corner--br"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- SECTION 2: PROFILE -->
+  <!-- 02: PROFILE -->
   <section class="scene" data-zone="PROFILE" data-idx="1">
-    <div class="card">
+    <div class="card card--wide">
       <div class="card__glow"></div>
       <div class="card__border"></div>
       <div class="card__inner">
         <div class="label">[ PROFILE ]</div>
-        <h2>SYSTEM<br>OPERATOR</h2>
-        <p class="body-text">Among the first to run Kubernetes in Fortune 500 production <strong>(2015–16)</strong>. Architected the platform underpinning Salesforce's largest infrastructure initiative.</p>
+        <h2>SYSTEM OPERATOR</h2>
+        <p class="body-text">Among the first to run Kubernetes in Fortune 500 production <strong>(2015–16)</strong>. Architected the platform underpinning Salesforce's largest infrastructure initiative — supporting over 1,800 services at 99.99% SLA with $74B in assets.</p>
         <div class="stat-grid">
           <div class="stat-card">
             <span class="stat-val">1,800+</span>
@@ -114,14 +118,14 @@
           </div>
           <div class="stat-card">
             <span class="stat-val">2015</span>
-            <span class="stat-lbl">K8s Pioneer</span>
+            <span class="stat-lbl">K8s Fortune 500 Pioneer</span>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 3: CAPABILITIES -->
+  <!-- 03: CAPABILITIES -->
   <section class="scene" data-zone="CAPABILITIES" data-idx="2">
     <div class="card card--wide">
       <div class="card__glow card__glow--magenta"></div>
@@ -159,7 +163,7 @@
     </div>
   </section>
 
-  <!-- SECTION 4: ARCHIVE -->
+  <!-- 04: ARCHIVE -->
   <section class="scene" data-zone="ARCHIVE" data-idx="3">
     <div class="card card--wide">
       <div class="card__glow"></div>
@@ -193,9 +197,9 @@
     </div>
   </section>
 
-  <!-- SECTION 5: TIMELINE -->
+  <!-- 05: TIMELINE -->
   <section class="scene" data-zone="TIMELINE" data-idx="4">
-    <div class="card">
+    <div class="card card--wide">
       <div class="card__glow card__glow--magenta"></div>
       <div class="card__border"></div>
       <div class="card__inner">
@@ -206,13 +210,13 @@
             <div class="tl-item__year">2023 — NOW</div>
             <div class="tl-item__company">NetApp</div>
             <div class="tl-item__role">Senior Director · AI Data Infrastructure</div>
-            <div class="tl-item__desc">Leading AI infrastructure strategy and engineering teams for next-generation data platforms.</div>
+            <div class="tl-item__desc">Leading AI infrastructure strategy and engineering teams for next-generation data platforms at scale.</div>
           </div>
           <div class="tl-item">
             <div class="tl-item__year">2015 — 2023</div>
             <div class="tl-item__company">Salesforce</div>
             <div class="tl-item__role">Principal Engineer → Senior Director</div>
-            <div class="tl-item__desc">8 years scaling from IC to executive. Built the K8s platform running $25B+ ARR.</div>
+            <div class="tl-item__desc">8-year journey from IC to executive. Built the K8s platform running $25B+ ARR supporting 1,800+ services at 99.99% SLA.</div>
           </div>
           <div class="tl-item">
             <div class="tl-item__year">2013 — 2015</div>
@@ -225,82 +229,118 @@
     </div>
   </section>
 
-  <!-- SECTION 6: TRANSMISSIONS -->
+  <!-- 06: TRANSMISSIONS — with real speaking photos -->
   <section class="scene" data-zone="TRANSMISSIONS" data-idx="5">
-    <div class="card">
+    <div class="card card--wide">
       <div class="card__glow"></div>
       <div class="card__border"></div>
       <div class="card__inner">
         <div class="label">[ TRANSMISSIONS ]</div>
-        <h2>SPEAKING +<br>PUBLICATIONS</h2>
-        <div class="transmission-list">
-          <div class="tx-item">
-            <div class="tx-item__type">KEYNOTE</div>
-            <div class="tx-item__title">NVIDIA GTC 2025</div>
-            <div class="tx-item__desc">AI Infrastructure at Scale</div>
+        <h2>SPEAKING + PUBLICATIONS</h2>
+        <div class="speaking-grid">
+          <div class="speaking-card">
+            <div class="speaking-card__img-wrap">
+              <img src="assets/speaking/nvidia-gtc-2025.jpg" alt="NVIDIA GTC 2025"
+                   onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
+            </div>
+            <div class="speaking-card__info">
+              <div class="speaking-card__event">NVIDIA GTC 2025</div>
+              <div class="speaking-card__topic">AI Infrastructure at Scale</div>
+            </div>
           </div>
-          <div class="tx-item">
-            <div class="tx-item__type">CONFERENCE</div>
-            <div class="tx-item__title">KubeCon EU 2024</div>
-            <div class="tx-item__desc">Production Kubernetes at Fortune 500</div>
+          <div class="speaking-card">
+            <div class="speaking-card__img-wrap">
+              <img src="assets/speaking/kubecon-eu-2024.jpg" alt="KubeCon EU 2024"
+                   onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
+            </div>
+            <div class="speaking-card__info">
+              <div class="speaking-card__event">KubeCon EU 2024</div>
+              <div class="speaking-card__topic">Production K8s at Fortune 500</div>
+            </div>
           </div>
-          <div class="tx-item">
-            <div class="tx-item__type">SUMMIT</div>
-            <div class="tx-item__title">NetApp INSIGHT</div>
-            <div class="tx-item__desc">AI Data Infrastructure Vision</div>
+          <div class="speaking-card">
+            <div class="speaking-card__img-wrap">
+              <img src="assets/speaking/netapp-insight-2024.jpg" alt="NetApp INSIGHT"
+                   onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
+            </div>
+            <div class="speaking-card__info">
+              <div class="speaking-card__event">NetApp INSIGHT</div>
+              <div class="speaking-card__topic">AI Data Infrastructure Vision</div>
+            </div>
           </div>
-          <div class="tx-item">
-            <div class="tx-item__type">WRITING</div>
-            <div class="tx-item__title">Medium · NetApp Tech Blog</div>
-            <div class="tx-item__desc">kube-synthetic-scaler on GitHub</div>
+          <div class="speaking-card">
+            <div class="speaking-card__img-wrap">
+              <img src="assets/speaking/salesforce-container-roundtable.jpg" alt="Salesforce Roundtable"
+                   onerror="this.parentElement.style.background='rgba(0,255,255,0.05)'">
+            </div>
+            <div class="speaking-card__info">
+              <div class="speaking-card__event">Salesforce Roundtable</div>
+              <div class="speaking-card__topic">Container Infrastructure</div>
+            </div>
           </div>
+        </div>
+        <div class="pub-row">
+          <span class="pub-tag">WRITING</span>
+          <span class="pub-links">Medium · NetApp Tech Blog · GitHub: kube-synthetic-scaler</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 7: CREDENTIALS -->
+  <!-- 07: CREDENTIALS — with real award photos -->
   <section class="scene" data-zone="CREDENTIALS" data-idx="6">
-    <div class="card">
+    <div class="card card--wide">
       <div class="card__glow card__glow--gold"></div>
       <div class="card__border card__border--gold"></div>
       <div class="card__inner">
         <div class="label">[ CREDENTIALS ]</div>
-        <h2>AWARDS &<br>CERTIFICATIONS</h2>
-        <div class="cred-list">
-          <div class="cred-item">
-            <div class="cred-item__year">2024</div>
-            <div class="cred-item__name">Salesforce 5-Year Impact Award</div>
+        <h2>AWARDS & CERTIFICATIONS</h2>
+        <div class="awards-grid">
+          <div class="award-card">
+            <div class="award-card__img-wrap">
+              <img src="assets/awards/salesforce-5yr.jpg" alt="Salesforce 5yr"
+                   onerror="this.parentElement.classList.add('no-img')">
+            </div>
+            <div class="award-card__year">2024</div>
+            <div class="award-card__name">Salesforce 5-Year Impact Award</div>
           </div>
-          <div class="cred-item">
-            <div class="cred-item__year">2022</div>
-            <div class="cred-item__name">Salesforce 3-Year Excellence Award</div>
+          <div class="award-card">
+            <div class="award-card__img-wrap">
+              <img src="assets/awards/salesforce-3yr-clean.png" alt="Salesforce 3yr"
+                   onerror="this.parentElement.classList.add('no-img')">
+            </div>
+            <div class="award-card__year">2022</div>
+            <div class="award-card__name">Salesforce 3-Year Excellence Award</div>
           </div>
-          <div class="cred-item">
-            <div class="cred-item__year">FY21</div>
-            <div class="cred-item__name">Best Tech Talk of the Year</div>
+          <div class="award-card">
+            <div class="award-card__img-wrap">
+              <img src="assets/awards/tech-talkie-2021-clean.png" alt="Best Tech Talk"
+                   onerror="this.parentElement.classList.add('no-img')">
+            </div>
+            <div class="award-card__year">FY21</div>
+            <div class="award-card__name">Best Tech Talk of the Year</div>
           </div>
-          <div class="cred-item">
-            <div class="cred-item__year">2019</div>
-            <div class="cred-item__name">Certified ScrumMaster (CSM)</div>
-          </div>
-          <div class="cred-item">
-            <div class="cred-item__year">3</div>
-            <div class="cred-item__name">US Patents Filed</div>
+          <div class="award-card">
+            <div class="award-card__img-wrap">
+              <img src="assets/awards/scrummaster-cert-enhanced.jpg" alt="ScrumMaster"
+                   onerror="this.parentElement.classList.add('no-img')">
+            </div>
+            <div class="award-card__year">2019</div>
+            <div class="award-card__name">Certified ScrumMaster (CSM)</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECTION 8: INTERFACE -->
+  <!-- 08: INTERFACE -->
   <section class="scene" data-zone="INTERFACE" data-idx="7">
-    <div class="card" data-variant="contact">
+    <div class="card card--wide">
       <div class="card__glow card__glow--magenta"></div>
       <div class="card__border"></div>
       <div class="card__inner">
         <div class="label">[ INTERFACE ]</div>
-        <h2>ESTABLISH<br>CHANNEL</h2>
+        <h2>ESTABLISH CHANNEL</h2>
         <p class="body-text">Open to <strong>senior engineering leadership</strong>, advisory roles, and speaking engagements.</p>
         <div class="contact-grid">
           <div class="contact-row">
@@ -326,6 +366,5 @@
 
 <script src="https://unpkg.com/babylonjs@6.34.0/babylon.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>

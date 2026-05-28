@@ -13,10 +13,40 @@
   ];
 
   const sections   = document.querySelectorAll('.sec');
+  const auxPanels  = document.querySelectorAll('.aux-panel');
   const dots       = document.querySelectorAll('.dot');
   const zoneEl     = document.getElementById('zone');
   const counterEl  = document.getElementById('section-counter');
   const progressBar = document.getElementById('progress-bar');
+
+  // ── Text scramble effect ─────────────────────────────────────────────────
+  const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@$%&*';
+
+  function scrambleText(el, finalText, duration) {
+    duration = duration || 650;
+    let frame = 0;
+    const totalFrames = Math.round(duration / 16);
+    // Store original HTML to restore line breaks
+    const lines = finalText.split('\n');
+
+    if (el._scrambleTimer) clearInterval(el._scrambleTimer);
+    el._scrambleTimer = setInterval(() => {
+      const progress = frame / totalFrames;
+      el.innerHTML = lines.map(line =>
+        line.split('').map((char, i) => {
+          if (char === ' ') return ' ';
+          const revealThreshold = progress * line.length;
+          if (i < revealThreshold) return `<span>${char}</span>`;
+          return `<span style="opacity:0.35;color:var(--cyan)">${SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)]}</span>`;
+        }).join('')
+      ).join('<br>');
+      frame++;
+      if (frame >= totalFrames) {
+        clearInterval(el._scrambleTimer);
+        el.innerHTML = lines.map(line => `<span>${line}</span>`).join('<br>');
+      }
+    }, 16);
+  }
 
   let currentSection  = 0;
   let scrollFraction  = 0;   // 0..1 across full scroll range
@@ -223,7 +253,23 @@
     if (idx === currentSection) return;
     currentSection = idx;
 
-    sections.forEach((s, i) => s.classList.toggle('active', i === idx));
+    // Swap main section panels
+    sections.forEach((s, i) => {
+      const wasActive = s.classList.contains('active');
+      s.classList.toggle('active', i === idx);
+      // Trigger scramble on title when section becomes active
+      if (i === idx && !wasActive) {
+        const titleEl = s.querySelector('.sec__title');
+        if (titleEl) {
+          const raw = titleEl.textContent.trim();
+          scrambleText(titleEl, raw, 700);
+        }
+      }
+    });
+
+    // Swap aux panels
+    auxPanels.forEach((p, i) => p.classList.toggle('active', i === idx));
+
     dots.forEach((d, i) => d.classList.toggle('active', i === idx));
 
     if (zoneEl)    zoneEl.textContent    = zones[idx];

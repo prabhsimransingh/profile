@@ -189,13 +189,36 @@ body {
   transform: translateY(-50%);
   width: 100%;
   opacity: 0;
-  transition: opacity 0.55s ease, transform 0.55s ease;
+  transition: opacity 0.3s ease;
   pointer-events: none;
 }
 .sec.active {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ── Staggered child reveals when section becomes active ─────────── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes reveal-line {
+  from { opacity: 0; transform: scaleX(0); transform-origin: left; }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
+.sec.active .sec__label  { animation: reveal-up 0.45s ease 0.05s both; }
+.sec.active .sec__title  { animation: reveal-up 0.55s ease 0.15s both; }
+.sec.active .sec__sub    { animation: reveal-up 0.4s  ease 0.30s both; }
+.sec.active .sec__body   { animation: reveal-up 0.4s  ease 0.40s both; }
+.sec.active .stat-row    { animation: reveal-up 0.4s  ease 0.55s both; }
+.sec.active .skill-list  { animation: reveal-up 0.4s  ease 0.35s both; }
+.sec.active .project-list{ animation: reveal-up 0.4s  ease 0.35s both; }
+.sec.active .timeline    { animation: reveal-up 0.4s  ease 0.35s both; }
+.sec.active .speaking-list{ animation: reveal-up 0.4s ease 0.35s both; }
+.sec.active .awards-list { animation: reveal-up 0.4s  ease 0.35s both; }
+.sec.active .contact-list{ animation: reveal-up 0.4s  ease 0.35s both; }
+.sec.active .social-row  { animation: reveal-up 0.4s  ease 0.55s both; }
 
 /* ── Section typography ──────────────────────────────────────────── */
 .sec__label {
@@ -428,6 +451,91 @@ body {
 }
 .social-row a:hover { color: var(--cyan); }
 
+/* ── Aux card (bottom-right supporting panel) ────────────────────── */
+#aux-card {
+  position: fixed;
+  right: 6vw;
+  bottom: 7vh;
+  width: 210px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.aux-panel {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  background: rgba(2, 18, 40, 0.75);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(0,212,255,0.14);
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+.aux-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.aux-panel img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  opacity: 0.88;
+}
+.aux-panel__label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--cyan);
+  margin-bottom: 0.3rem;
+  opacity: 0.7;
+}
+.aux-panel__val {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--white);
+  line-height: 1;
+}
+.aux-panel__sub {
+  font-size: 0.7rem;
+  color: var(--grey);
+  margin-top: 0.25rem;
+}
+.aux-panel .aux-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+.aux-panel .aux-chips span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 100px;
+  background: rgba(0,212,255,0.07);
+  border: 1px solid rgba(0,212,255,0.2);
+  color: var(--cyan-dim);
+}
+.aux-panel .aux-links { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.4rem; }
+.aux-panel .aux-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--grey);
+  text-decoration: none;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+.aux-panel .aux-links a:hover { color: var(--cyan); }
+
 /* ── Custom scrollbar ────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -448,4 +556,5 @@ body {
   .sec__title { font-size: clamp(2rem, 9vw, 3.2rem); }
   .dot-nav { right: 1rem; }
   .brand { display: none; }
+  #aux-card { display: none; }
 }

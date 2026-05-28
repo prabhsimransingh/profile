@@ -22,7 +22,14 @@
 })();
 </script>
 
-<canvas id="renderCanvas"></canvas>
+<!-- Atmospheric background orbs -->
+<div class="bg-orbs">
+  <div class="orb orb--1"></div>
+  <div class="orb orb--2"></div>
+  <div class="orb orb--3"></div>
+  <div class="orb orb--4"></div>
+</div>
+<div class="grain"></div>
 <div class="scanlines"></div>
 
 <!-- Boot Screen -->
@@ -56,148 +63,137 @@
   <button class="dot" data-idx="7" title="Interface"></button>
 </nav>
 
-<main>
+<!-- Fixed 3D Stage — cylinder rotates as user scrolls -->
+<div id="stage">
 
-  <!-- 01: IDENTITY — full-width hero -->
-  <section class="scene" data-zone="IDENTITY" data-idx="0">
-    <div class="card card--hero">
-      <div class="card__glow"></div>
-      <div class="card__border"></div>
-      <div class="card__inner card__inner--split">
+  <!-- Central glowing pipe (the axis) -->
+  <div class="pipe"></div>
 
-        <div class="split__text">
+  <!-- Rotating cylinder: 8 cards at 45° intervals -->
+  <div id="cylinder">
+
+    <!-- 01: IDENTITY — 0° -->
+    <div class="cyl-slot" data-idx="0" data-zone="IDENTITY" style="--deg:0">
+      <div class="cyl-card">
+        <div class="cyl-card__border"></div>
+        <div class="cyl-card__glow"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ IDENTITY ]</div>
-          <h1>PRABH<br>SINGH</h1>
-          <p class="subtitle">Engineering Executive · Kubernetes Pioneer</p>
+          <div class="hero-layout">
+            <div class="hero-avatar">
+              <div class="avatar-frame">
+                <img src="assets/avatar.jpg" alt="Prabh Singh" class="avatar-img"
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+                <div class="avatar-fallback" style="display:none">PS</div>
+                <div class="avatar-ring avatar-ring--1"></div>
+                <div class="avatar-ring avatar-ring--2"></div>
+              </div>
+            </div>
+            <div class="hero-text">
+              <h1>PRABH<br>SINGH</h1>
+              <p class="subtitle">Engineering Executive<br>Kubernetes Pioneer</p>
+            </div>
+          </div>
           <p class="body-text">Built platforms running <strong>$25B+ ARR</strong> at Salesforce. Pioneering AI infrastructure at NetApp. CMU MS dual degree.</p>
           <div class="meta-row">
             <div class="meta-badge"><span class="meta-val">15+</span><span class="meta-lbl">Years</span></div>
             <div class="meta-badge"><span class="meta-val">100+</span><span class="meta-lbl">Engineers</span></div>
             <div class="meta-badge"><span class="meta-val">3</span><span class="meta-lbl">Patents</span></div>
-            <div class="meta-badge"><span class="meta-val">$25B+</span><span class="meta-lbl">ARR Built</span></div>
+            <div class="meta-badge"><span class="meta-val">$25B+</span><span class="meta-lbl">ARR</span></div>
           </div>
         </div>
-
-        <div class="split__photo">
-          <div class="avatar-frame">
-            <img src="assets/avatar.jpg" alt="Prabh Singh" class="avatar-img"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
-            <div class="avatar-fallback" style="display:none">PS</div>
-            <div class="avatar-ring avatar-ring--1"></div>
-            <div class="avatar-ring avatar-ring--2"></div>
-            <div class="avatar-corner avatar-corner--tl"></div>
-            <div class="avatar-corner avatar-corner--br"></div>
-          </div>
-        </div>
-
       </div>
     </div>
-  </section>
 
-  <!-- SPINE TIMELINE: sections 02-08 alternate left/right around central 3D spine -->
-  <div id="spine-timeline">
-
-    <!-- 02: PROFILE — LEFT -->
-    <section class="scene scene--left" data-zone="PROFILE" data-idx="1">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 02: PROFILE — 45° -->
+    <div class="cyl-slot" data-idx="1" data-zone="PROFILE" style="--deg:45">
+      <div class="cyl-card">
+        <div class="cyl-card__border"></div>
+        <div class="cyl-card__glow"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ PROFILE ]</div>
           <h2>SYSTEM OPERATOR</h2>
-          <p class="body-text">Among the first to run Kubernetes in Fortune 500 production <strong>(2015–16)</strong>. Architected the platform underpinning Salesforce's largest infrastructure initiative — supporting 1,800+ services at 99.99% SLA with $74B in assets.</p>
+          <p class="body-text">Among the first to run Kubernetes in Fortune 500 production <strong>(2015–16)</strong>. Platform supporting 1,800+ services at 99.99% SLA with $74B in assets.</p>
           <div class="stat-grid">
-            <div class="stat-card"><span class="stat-val">1,800+</span><span class="stat-lbl">Services @ 99.99% SLA</span></div>
+            <div class="stat-card"><span class="stat-val">1,800+</span><span class="stat-lbl">Services @ 99.99%</span></div>
             <div class="stat-card"><span class="stat-val">$74B</span><span class="stat-lbl">Assets on Platform</span></div>
             <div class="stat-card"><span class="stat-val">8 yrs</span><span class="stat-lbl">@ Salesforce</span></div>
-            <div class="stat-card"><span class="stat-val">2015</span><span class="stat-lbl">K8s Fortune 500 Pioneer</span></div>
+            <div class="stat-card"><span class="stat-val">2015</span><span class="stat-lbl">K8s Pioneer</span></div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 03: CAPABILITIES — RIGHT -->
-    <section class="scene scene--right" data-zone="CAPABILITIES" data-idx="2">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow card__glow--magenta"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 03: CAPABILITIES — 90° -->
+    <div class="cyl-slot" data-idx="2" data-zone="CAPABILITIES" style="--deg:90">
+      <div class="cyl-card">
+        <div class="cyl-card__border cyl-card__border--magenta"></div>
+        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ CAPABILITIES ]</div>
           <h2>TECHNICAL DEPTH</h2>
           <div class="skill-grid">
             <div class="skill-group">
               <div class="skill-group__label">INFRASTRUCTURE</div>
-              <div class="chips">
-                <span>Kubernetes</span><span>Terraform</span><span>Service Mesh</span><span>Zero Trust</span>
-              </div>
+              <div class="chips"><span>Kubernetes</span><span>Terraform</span><span>Service Mesh</span><span>Zero Trust</span></div>
             </div>
             <div class="skill-group">
               <div class="skill-group__label">LANGUAGES</div>
-              <div class="chips">
-                <span>Python</span><span>Go</span><span>TypeScript</span><span>Bash</span>
-              </div>
+              <div class="chips"><span>Python</span><span>Go</span><span>TypeScript</span><span>Bash</span></div>
             </div>
             <div class="skill-group">
               <div class="skill-group__label">CLOUD & OPS</div>
-              <div class="chips">
-                <span>AWS</span><span>GCP</span><span>CI/CD</span><span>Microservices</span>
-              </div>
+              <div class="chips"><span>AWS</span><span>GCP</span><span>CI/CD</span><span>Microservices</span></div>
             </div>
             <div class="skill-group">
               <div class="skill-group__label">AI / MODERN</div>
-              <div class="chips">
-                <span>AI Agents</span><span>LLM Infra</span><span>DataOps</span><span>MLOps</span>
-              </div>
+              <div class="chips"><span>AI Agents</span><span>LLM Infra</span><span>DataOps</span><span>MLOps</span></div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 04: ARCHIVE — LEFT -->
-    <section class="scene scene--left" data-zone="ARCHIVE" data-idx="3">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 04: ARCHIVE — 135° -->
+    <div class="cyl-slot" data-idx="3" data-zone="ARCHIVE" style="--deg:135">
+      <div class="cyl-card">
+        <div class="cyl-card__border"></div>
+        <div class="cyl-card__glow"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ ARCHIVE ]</div>
           <h2>FEATURED PROJECTS</h2>
           <div class="project-grid">
             <div class="project-card">
               <div class="project-card__tag">AI</div>
               <div class="project-card__name">ApplyPilot</div>
-              <div class="project-card__desc">AI-powered job application pipeline with Claude AI orchestration and automated resume tailoring</div>
+              <div class="project-card__desc">AI-powered job application pipeline with Claude AI orchestration</div>
             </div>
             <div class="project-card">
               <div class="project-card__tag">BOT</div>
               <div class="project-card__name">Job Apply Bot</div>
-              <div class="project-card__desc">LinkedIn + Indeed automation using Playwright and AI for intelligent job matching</div>
+              <div class="project-card__desc">LinkedIn + Indeed automation using Playwright and AI</div>
             </div>
             <div class="project-card">
               <div class="project-card__tag">WEB</div>
               <div class="project-card__name">CricManager</div>
-              <div class="project-card__desc">Full-stack cricket club management platform with scheduling, stats and team management</div>
+              <div class="project-card__desc">Full-stack cricket club management platform</div>
             </div>
             <div class="project-card">
               <div class="project-card__tag">FINANCE</div>
               <div class="project-card__name">Budget Tracker</div>
-              <div class="project-card__desc">AI-powered personal finance OS with intelligent spending analysis and forecasting</div>
+              <div class="project-card__desc">AI-powered personal finance OS</div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 05: TIMELINE — RIGHT -->
-    <section class="scene scene--right" data-zone="TIMELINE" data-idx="4">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow card__glow--magenta"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 05: TIMELINE — 180° -->
+    <div class="cyl-slot" data-idx="4" data-zone="TIMELINE" style="--deg:180">
+      <div class="cyl-card">
+        <div class="cyl-card__border cyl-card__border--magenta"></div>
+        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ TIMELINE ]</div>
           <h2>CAREER LOG</h2>
           <div class="timeline">
@@ -205,32 +201,31 @@
               <div class="tl-item__year">2023 — NOW</div>
               <div class="tl-item__company">NetApp</div>
               <div class="tl-item__role">Senior Director · AI Data Infrastructure</div>
-              <div class="tl-item__desc">Leading AI infrastructure strategy and engineering teams for next-generation data platforms at scale.</div>
+              <div class="tl-item__desc">Leading AI infrastructure strategy and engineering teams for next-generation data platforms.</div>
             </div>
             <div class="tl-item">
               <div class="tl-item__year">2015 — 2023</div>
               <div class="tl-item__company">Salesforce</div>
               <div class="tl-item__role">Principal Engineer → Senior Director</div>
-              <div class="tl-item__desc">8-year journey from IC to executive. Built the K8s platform running $25B+ ARR supporting 1,800+ services at 99.99% SLA.</div>
+              <div class="tl-item__desc">8-year journey from IC to executive. Built the K8s platform running $25B+ ARR.</div>
             </div>
             <div class="tl-item">
               <div class="tl-item__year">2013 — 2015</div>
               <div class="tl-item__company">Carnegie Mellon</div>
               <div class="tl-item__role">MS Information Systems</div>
-              <div class="tl-item__desc">Dual degree program. Focus on distributed systems and enterprise architecture.</div>
+              <div class="tl-item__desc">Dual degree. Focus on distributed systems and enterprise architecture.</div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 06: TRANSMISSIONS — LEFT -->
-    <section class="scene scene--left" data-zone="TRANSMISSIONS" data-idx="5">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 06: TRANSMISSIONS — 225° -->
+    <div class="cyl-slot" data-idx="5" data-zone="TRANSMISSIONS" style="--deg:225">
+      <div class="cyl-card">
+        <div class="cyl-card__border"></div>
+        <div class="cyl-card__glow"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ TRANSMISSIONS ]</div>
           <h2>SPEAKING</h2>
           <div class="speaking-grid">
@@ -261,7 +256,7 @@
               </div>
               <div class="speaking-card__info">
                 <div class="speaking-card__event">NetApp INSIGHT</div>
-                <div class="speaking-card__topic">AI Data Infrastructure Vision</div>
+                <div class="speaking-card__topic">AI Data Infrastructure</div>
               </div>
             </div>
             <div class="speaking-card">
@@ -275,21 +270,16 @@
               </div>
             </div>
           </div>
-          <div class="pub-row">
-            <span class="pub-tag">WRITING</span>
-            <span class="pub-links">Medium · NetApp Tech Blog · GitHub: kube-synthetic-scaler</span>
-          </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 07: CREDENTIALS — RIGHT -->
-    <section class="scene scene--right" data-zone="CREDENTIALS" data-idx="6">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow card__glow--gold"></div>
-        <div class="card__border card__border--gold"></div>
-        <div class="card__inner">
+    <!-- 07: CREDENTIALS — 270° -->
+    <div class="cyl-slot" data-idx="6" data-zone="CREDENTIALS" style="--deg:270">
+      <div class="cyl-card">
+        <div class="cyl-card__border cyl-card__border--gold"></div>
+        <div class="cyl-card__glow cyl-card__glow--gold"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ CREDENTIALS ]</div>
           <h2>AWARDS</h2>
           <div class="awards-grid">
@@ -307,7 +297,7 @@
                      onerror="this.parentElement.classList.add('no-img')">
               </div>
               <div class="award-card__year">2022</div>
-              <div class="award-card__name">Salesforce 3-Year Excellence Award</div>
+              <div class="award-card__name">Salesforce 3-Year Excellence</div>
             </div>
             <div class="award-card">
               <div class="award-card__img-wrap">
@@ -328,15 +318,14 @@
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- 08: INTERFACE — LEFT -->
-    <section class="scene scene--left" data-zone="INTERFACE" data-idx="7">
-      <div class="spine-node"></div>
-      <div class="card">
-        <div class="card__glow card__glow--magenta"></div>
-        <div class="card__border"></div>
-        <div class="card__inner">
+    <!-- 08: INTERFACE — 315° -->
+    <div class="cyl-slot" data-idx="7" data-zone="INTERFACE" style="--deg:315">
+      <div class="cyl-card">
+        <div class="cyl-card__border cyl-card__border--magenta"></div>
+        <div class="cyl-card__glow cyl-card__glow--magenta"></div>
+        <div class="cyl-card__inner">
           <div class="label">[ INTERFACE ]</div>
           <h2>ESTABLISH CHANNEL</h2>
           <p class="body-text">Open to <strong>senior engineering leadership</strong>, advisory roles, and speaking engagements.</p>
@@ -358,13 +347,14 @@
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
-  </div><!-- /#spine-timeline -->
+  </div><!-- /#cylinder -->
+</div><!-- /#stage -->
 
-</main>
+<!-- Scroll spacer: 7 transitions × 100vh for 8 cards -->
+<div class="scroll-spacer"></div>
 
-<script src="https://unpkg.com/babylonjs@6.34.0/babylon.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

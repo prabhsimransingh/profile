@@ -56,46 +56,16 @@ body {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.9s ease, transform 0.9s ease;
+  background: rgba(1, 13, 26, 0.97);
+  transition: opacity 1s ease;
 }
-.boot.out { opacity: 0; transform: scale(1.04); pointer-events: none; }
-.boot__inner { text-align: center; }
-.boot__logo {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: clamp(3rem, 8vw, 5rem);
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--cyan), #7b6fff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.1em;
-  margin-bottom: 1rem;
+.boot.out { opacity: 0; pointer-events: none; }
+#boot-arc {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
-.boot__text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: var(--cyan-dim);
-  letter-spacing: 0.3em;
-  margin-bottom: 2rem;
-}
-.boot__bar-wrap {
-  width: 160px;
-  height: 2px;
-  background: rgba(0,212,255,0.1);
-  margin: 0 auto;
-  border-radius: 1px;
-  overflow: hidden;
-}
-.boot__bar {
-  height: 100%;
-  background: var(--cyan);
-  animation: boot-fill 2.4s ease forwards;
-}
-@keyframes boot-fill { from { width: 0 } to { width: 100% } }
 
 /* ── Top-left nav label ──────────────────────────────────────────── */
 .nav-label {

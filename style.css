@@ -172,11 +172,11 @@ body {
 /* ── Left content panel ──────────────────────────────────────────── */
 #content-panel {
   position: fixed;
-  left: 6vw;
+  left: 3vw;
   top: 50%;
   transform: translateY(-50%);
-  width: 42vw;
-  max-width: 560px;
+  width: 58vw;
+  max-width: 720px;
   z-index: 20;
   pointer-events: none;
 }

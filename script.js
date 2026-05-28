@@ -236,7 +236,7 @@
     flashLight.position.set(0, 0, 0);
     scene.add(flashLight);
 
-    scene.add(new THREE.AmbientLight(0x04112a, 2));
+    scene.add(new THREE.AmbientLight(0x0a2040, 4));
 
     // ── Per-section accent colors (for shards, pillar, light) ────────
     const SECTION_COLORS = [
@@ -244,16 +244,16 @@
       0xffbb00, 0xff44bb, 0xaa44ff, 0x00ffdd,
     ];
 
-    // ── Per-section scene background colors ──────────────────────────
+    // ── Per-section scene background colors (richer, not pure black) ─
     const BG_COLORS = [
-      new THREE.Color(0x000810), // IDENTITY:      deep navy
-      new THREE.Color(0x001408), // PROFILE:       deep forest
-      new THREE.Color(0x080418), // CAPABILITIES:  deep violet
-      new THREE.Color(0x120600), // ARCHIVE:       deep amber
-      new THREE.Color(0x160005), // TIMELINE:      deep crimson
-      new THREE.Color(0x001410), // TRANSMISSIONS: deep teal
-      new THREE.Color(0x060012), // CREDENTIALS:   deep indigo
-      new THREE.Color(0x001c1c), // INTERFACE:     deep cyan
+      new THREE.Color(0x001428), // IDENTITY:      rich navy
+      new THREE.Color(0x00200e), // PROFILE:       rich forest
+      new THREE.Color(0x100638), // CAPABILITIES:  rich violet
+      new THREE.Color(0x280e00), // ARCHIVE:       rich amber
+      new THREE.Color(0x2a000c), // TIMELINE:      rich crimson
+      new THREE.Color(0x00201c), // TRANSMISSIONS: rich teal
+      new THREE.Color(0x0e0030), // CREDENTIALS:   rich indigo
+      new THREE.Color(0x003030), // INTERFACE:     rich cyan
     ];
 
     // ── Chrome torus ──────────────────────────────────────────────────
@@ -395,8 +395,8 @@
     partGeo.setAttribute('position', new THREE.BufferAttribute(pp, 3));
     partGeo.setAttribute('color',    new THREE.BufferAttribute(pc, 3));
     const partMat = new THREE.PointsMaterial({
-      size:1.5, map:new THREE.CanvasTexture(spCvs),
-      vertexColors:true, transparent:true, opacity:0.7,
+      size:1.8, map:new THREE.CanvasTexture(spCvs),
+      vertexColors:true, transparent:true, opacity:0.85,
       blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true,
     });
     scene.add(new THREE.Points(partGeo, partMat));
@@ -474,21 +474,31 @@
         }
       }
 
-      // ── Horizontal card slide — two cards flanking the 3D column ─────
-      // Active card sits left-of-center; next card is right-of-center.
-      // The 3D column renders in the gap between them (~47–53vw).
+      // ── Vertical drum / Ferris-wheel card rotation ────────────────────
+      // Cards are fixed at left:3vw (CSS). JS rotates them around the X axis
+      // like a Ferris wheel: active card faces front, past cards arc upward
+      // and back, upcoming cards wait below and rotate into view.
       smoothScroll += (scrollProgress - smoothScroll) * 0.07;
 
       if (introComplete) {
-        // Each card slot is 50vw wide. Active card anchored at 3vw from left.
+        const DRUM_R = 280; // px — radius of the vertical drum
         sections.forEach((s, i) => {
-          const offset   = 3 + (i - smoothScroll) * 50; // vw from left
-          const absDelta = Math.abs(i - smoothScroll);
-          // Gentle opacity — both left+right cards visible during transition
-          const op = Math.max(0, 1 - absDelta * 1.1);
+          const delta    = smoothScroll - i;
+          const absDelta = Math.abs(delta);
+          // Drum angle: 90° per section so card is fully horizontal at ±1
+          const ang = delta * (Math.PI / 2);
+          // Y: past cards rise up (negative), future cards wait below (positive)
+          const ty  = -Math.sin(ang) * DRUM_R;
+          // Z: recede behind as they rotate to top or bottom
+          const tz  = (Math.cos(ang) - 1) * DRUM_R;
+          // Tilt: card rotates face-up as it goes over the top
+          const rx  = ang * (180 / Math.PI);
+          // Cosine opacity — smooth, both transition cards visible simultaneously
+          const op  = Math.max(0, Math.cos(Math.min(absDelta, 1) * Math.PI / 2));
+
           s.style.opacity       = op;
-          s.style.transform     = `translateY(-50%) translateX(${offset}vw)`;
-          s.style.pointerEvents = absDelta < 0.45 ? 'auto' : 'none';
+          s.style.transform     = `perspective(1100px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateX(${rx}deg)`;
+          s.style.pointerEvents = absDelta < 0.42 ? 'auto' : 'none';
         });
       }
 

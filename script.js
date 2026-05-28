@@ -91,6 +91,23 @@
   // Hide content panel until Three.js intro completes
   if (contentPanel) { contentPanel.style.opacity='0'; contentPanel.style.transition='opacity 1.2s ease'; }
 
+  // ── Cylinder constants ────────────────────────────────────────────
+  // Cards orbit around the backbone pillar in 3D — like a carousel cylinder
+  const CYLINDER_R  = 320;                               // px radius of card cylinder
+  const ANGLE_STEP  = (Math.PI * 2) / SECTION_COUNT;    // 45° between each card
+
+  // Place each card on the cylinder — these transforms are fixed;
+  // the panel itself rotates (JS in render loop) to bring cards into view.
+  if (contentPanel) {
+    contentPanel.style.transformStyle = 'preserve-3d';
+    sections.forEach((s, i) => {
+      // rotateY: place at correct angle on cylinder
+      // translateZ: push out from center by radius
+      // translateY(-50%): vertically center card at pivot height
+      s.style.transform = `rotateY(${i * ANGLE_STEP}rad) translateZ(${CYLINDER_R}px) translateY(-50%)`;
+    });
+  }
+
   // ── Boot arc canvas preloader ─────────────────────────────────────────────
   // Draws: small glowing ring + two sweeping comet arc trails
   // Sits on top of the THREE.js canvas (which renders behind the boot overlay)
@@ -202,10 +219,10 @@
     const renderer = new THREE.WebGLRenderer({ canvas, alpha:false, antialias:true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x010d1a, 1);
+    renderer.setClearColor(0x000608, 1);
 
     const scene  = new THREE.Scene();
-    scene.fog    = new THREE.FogExp2(0x010d1a, 0.008);
+    scene.fog    = new THREE.FogExp2(0x000608, 0.008);
 
     // Camera starts FAR (z=90, torus tiny) — flies IN to z=22
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 400);
@@ -458,22 +475,25 @@
         }
       }
 
-      // ── Fluid floating card motion ────────────────────────────────────
-      // Lerp smoothScroll toward real scrollProgress for spring-like feel
+      // ── Cylindrical card orbit ────────────────────────────────────────
+      // smoothScroll lerps toward scrollProgress for spring deceleration
       smoothScroll += (scrollProgress - smoothScroll) * 0.08;
 
       if (introComplete) {
+        // Rotate the whole cylinder panel so current section faces camera
+        const panelAngle = -smoothScroll * ANGLE_STEP;
+        contentPanel.style.transform = `perspective(1000px) rotateY(${panelAngle}rad)`;
+
         sections.forEach((s, i) => {
-          // delta: 0 = active, -1 = upcoming from below, +1 = past going up
-          const delta = Math.max(-1.2, Math.min(1.2, smoothScroll - i));
-          const absDelta = Math.abs(delta);
-          // opacity: full at centre, zero at ±1
-          const op = Math.max(0, 1 - absDelta * 1.1);
-          // translateY: past goes up (-ve), upcoming comes from below (+ve)
-          const ty = -delta * 90;
-          s.style.opacity   = op;
-          s.style.transform = `translateY(calc(-50% + ${ty}px))`;
-          s.style.pointerEvents = absDelta < 0.5 ? 'auto' : 'none';
+          // Angular distance from front face (wraps at 4 sections = 180°)
+          let d = smoothScroll - i;
+          while (d >  SECTION_COUNT / 2) d -= SECTION_COUNT;
+          while (d < -SECTION_COUNT / 2) d += SECTION_COUNT;
+          const absDelta = Math.abs(d);
+          // Cards past 90° (absDelta > 2) are fully hidden
+          const op = Math.max(0, 1 - absDelta * 0.7);
+          s.style.opacity = op;
+          s.style.pointerEvents = absDelta < 0.4 ? 'auto' : 'none';
         });
       }
 

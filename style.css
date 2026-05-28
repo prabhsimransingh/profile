@@ -3,8 +3,8 @@
    ============================================================================ */
 
 :root {
-  --bg:       #01101e;
-  --blue-mid: #021e38;
+  --bg:       #000608;
+  --blue-mid: #000e18;
   --cyan:     #00d4ff;
   --cyan-dim: rgba(0,212,255,0.6);
   --white:    #f0f4f8;
@@ -139,35 +139,42 @@ body {
 }
 .dot:hover { background: var(--cyan-dim); }
 
-/* ── Left content panel ──────────────────────────────────────────── */
+/* ── Content panel — pivot point for 3D cylinder, JS drives rotateY ─ */
 #content-panel {
   position: fixed;
   left: 50%;
   top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  width: min(600px, 88vw);
+  width: 0;
+  height: 0;
   z-index: 20;
   pointer-events: none;
+  transform-style: preserve-3d;
+  /* JS sets: perspective(1000px) rotateY(angle) */
 }
 
-/* Each section — JS drives opacity + translateY for fluid floating motion */
+/* Each section card — placed on cylinder via JS rotateY+translateZ ── */
 .sec {
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
+  width: min(560px, 86vw);
+  left: calc(-1 * min(280px, 43vw));
+  top: 0;
   opacity: 0;
-  /* transform set by JS: translateY(calc(-50% + offset)) */
-  transform: translateY(-50%);
   will-change: transform, opacity;
   pointer-events: none;
-  /* Glassmorphism card */
-  background: rgba(1, 14, 30, 0.55);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  border: 1px solid rgba(0, 212, 255, 0.10);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* True glassmorphism — low opacity so canvas shows through blur */
+  background: rgba(0, 10, 22, 0.28);
+  backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
+  -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 20px;
   padding: 2.6rem 3rem;
+  box-shadow:
+    0 0 60px rgba(0, 212, 255, 0.08),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 .sec.active {
   pointer-events: auto;

@@ -91,22 +91,8 @@
   // Hide content panel until Three.js intro completes
   if (contentPanel) { contentPanel.style.opacity='0'; contentPanel.style.transition='opacity 1.2s ease'; }
 
-  // ── Cylinder constants ────────────────────────────────────────────
-  // Cards orbit around the backbone pillar in 3D — like a carousel cylinder
-  const CYLINDER_R  = 320;                               // px radius of card cylinder
-  const ANGLE_STEP  = (Math.PI * 2) / SECTION_COUNT;    // 45° between each card
-
-  // Place each card on the cylinder — these transforms are fixed;
-  // the panel itself rotates (JS in render loop) to bring cards into view.
-  if (contentPanel) {
-    contentPanel.style.transformStyle = 'preserve-3d';
-    sections.forEach((s, i) => {
-      // rotateY: place at correct angle on cylinder
-      // translateZ: push out from center by radius
-      // translateY(-50%): vertically center card at pivot height
-      s.style.transform = `rotateY(${i * ANGLE_STEP}rad) translateZ(${CYLINDER_R}px) translateY(-50%)`;
-    });
-  }
+  // Reset any stale card transforms from previous sessions
+  sections.forEach(s => { s.style.transform = ''; });
 
   // ── Boot arc canvas preloader ─────────────────────────────────────────────
   // Draws: small glowing ring + two sweeping comet arc trails
@@ -475,25 +461,31 @@
         }
       }
 
-      // ── Cylindrical card orbit ────────────────────────────────────────
-      // smoothScroll lerps toward scrollProgress for spring deceleration
-      smoothScroll += (scrollProgress - smoothScroll) * 0.08;
+      // ── Helix / screw card motion ─────────────────────────────────────
+      // Cards rise vertically while spinning around Y — like a screw being
+      // unscrewed upward. Active card faces front; past/future recede.
+      smoothScroll += (scrollProgress - smoothScroll) * 0.07;
 
       if (introComplete) {
-        // Rotate the whole cylinder panel so current section faces camera
-        const panelAngle = -smoothScroll * ANGLE_STEP;
-        contentPanel.style.transform = `perspective(1000px) rotateY(${panelAngle}rad)`;
-
         sections.forEach((s, i) => {
-          // Angular distance from front face (wraps at 4 sections = 180°)
-          let d = smoothScroll - i;
-          while (d >  SECTION_COUNT / 2) d -= SECTION_COUNT;
-          while (d < -SECTION_COUNT / 2) d += SECTION_COUNT;
-          const absDelta = Math.abs(d);
-          // Cards past 90° (absDelta > 2) are fully hidden
-          const op = Math.max(0, 1 - absDelta * 0.7);
-          s.style.opacity = op;
-          s.style.pointerEvents = absDelta < 0.4 ? 'auto' : 'none';
+          const delta    = smoothScroll - i;
+          const absDelta = Math.abs(delta);
+          // Opacity: fully visible at 0, gone by ±1
+          const op  = Math.max(0, 1 - absDelta * 1.4);
+          // Vertical: past cards rise up, upcoming cards wait below
+          const ty  = delta * -110;
+          // Screw spin: positive delta (past) spins left, negative (upcoming) right
+          const ry  = delta * -42;
+          // Slight tilt toward/away from camera for depth
+          const rx  = delta * 8;
+          // Depth: non-active cards push back in Z
+          const tz  = -(absDelta * absDelta) * 55;
+          // Subtle scale
+          const scl = Math.max(0.78, 1 - absDelta * 0.11);
+
+          s.style.opacity   = op;
+          s.style.transform = `translateY(${ty}px) translateZ(${tz}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${scl})`;
+          s.style.pointerEvents = absDelta < 0.45 ? 'auto' : 'none';
         });
       }
 

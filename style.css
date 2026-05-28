@@ -139,42 +139,40 @@ body {
 }
 .dot:hover { background: var(--cyan-dim); }
 
-/* ── Content panel — pivot point for 3D cylinder, JS drives rotateY ─ */
+/* ── Content panel — centered, perspective container for 3D screw motion */
 #content-panel {
   position: fixed;
   left: 50%;
   top: 50%;
-  width: 0;
-  height: 0;
+  transform: translateX(-50%) translateY(-50%);
+  width: min(540px, 88vw);
   z-index: 20;
   pointer-events: none;
-  transform-style: preserve-3d;
-  /* JS sets: perspective(1000px) rotateY(angle) */
+  perspective: 1100px;
+  perspective-origin: 50% 50%;
 }
 
-/* Each section card — placed on cylinder via JS rotateY+translateZ ── */
+/* Each section card — JS drives helix transform (translateY + rotateY + tz) */
 .sec {
   position: absolute;
-  width: min(560px, 86vw);
-  left: calc(-1 * min(280px, 43vw));
   top: 0;
+  left: 0;
+  width: 100%;
   opacity: 0;
   will-change: transform, opacity;
   pointer-events: none;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  /* True glassmorphism — low opacity so canvas shows through blur */
-  background: rgba(0, 10, 22, 0.28);
-  backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
-  -webkit-backdrop-filter: blur(30px) saturate(180%) brightness(1.1);
-  border: 1px solid rgba(0, 212, 255, 0.22);
-  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  /* Glassmorphism — readable but translucent */
+  background: rgba(0, 8, 20, 0.52);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(0, 212, 255, 0.20);
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 20px;
   padding: 2.6rem 3rem;
   box-shadow:
-    0 0 60px rgba(0, 212, 255, 0.08),
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    0 0 50px rgba(0, 212, 255, 0.07),
+    0 24px 64px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .sec.active {
   pointer-events: auto;

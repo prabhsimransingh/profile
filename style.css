@@ -151,19 +151,26 @@ body {
   pointer-events: none;
 }
 
-/* Each section fades in/out */
+/* Each section — JS drives opacity + translateY for fluid floating motion */
 .sec {
   position: absolute;
   top: 50%;
   left: 0;
-  transform: translateY(-50%);
   width: 100%;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  /* transform set by JS: translateY(calc(-50% + offset)) */
+  transform: translateY(-50%);
+  will-change: transform, opacity;
   pointer-events: none;
+  /* Glassmorphism card */
+  background: rgba(1, 14, 30, 0.55);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border: 1px solid rgba(0, 212, 255, 0.10);
+  border-radius: 20px;
+  padding: 2.6rem 3rem;
 }
 .sec.active {
-  opacity: 1;
   pointer-events: auto;
 }
 

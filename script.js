@@ -343,6 +343,9 @@
     let _targetRotY=0, _currentRotY=0;
     _setTargetRotY = v => { _targetRotY=v; };
 
+    // Smooth-scrolled position for fluid card motion (lerped toward scrollProgress)
+    let smoothScroll = 0;
+
     // ── Intro: camera flies IN from far (z=90) to close (z=22) ───────
     // At z=90 torus appears as tiny ring → matches boot preloader ring visual
     // Explosion peaks at p≈0.75 (flythrough moment), then boot fades
@@ -401,6 +404,25 @@
           if (contentPanel) contentPanel.style.opacity = '1';
           flashLight.intensity = 0;
         }
+      }
+
+      // ── Fluid floating card motion ────────────────────────────────────
+      // Lerp smoothScroll toward real scrollProgress for spring-like feel
+      smoothScroll += (scrollProgress - smoothScroll) * 0.08;
+
+      if (introComplete) {
+        sections.forEach((s, i) => {
+          // delta: 0 = active, -1 = upcoming from below, +1 = past going up
+          const delta = Math.max(-1.2, Math.min(1.2, smoothScroll - i));
+          const absDelta = Math.abs(delta);
+          // opacity: full at centre, zero at ±1
+          const op = Math.max(0, 1 - absDelta * 1.1);
+          // translateY: past goes up (-ve), upcoming comes from below (+ve)
+          const ty = -delta * 90;
+          s.style.opacity   = op;
+          s.style.transform = `translateY(calc(-50% + ${ty}px))`;
+          s.style.pointerEvents = absDelta < 0.5 ? 'auto' : 'none';
+        });
       }
 
       // ── Torus scroll-driven fade: visible at section 0, gone by section 1 ──

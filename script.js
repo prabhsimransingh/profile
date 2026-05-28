@@ -261,7 +261,11 @@
       if (i === idx && !wasActive) {
         const titleEl = s.querySelector('.sec__title');
         if (titleEl) {
-          const raw = titleEl.textContent.trim();
+          // Preserve <br> as \n so scramble restores line breaks correctly
+          const raw = titleEl.innerHTML
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<[^>]+>/g, '')
+            .trim();
           scrambleText(titleEl, raw, 700);
         }
       }

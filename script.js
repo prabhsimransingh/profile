@@ -235,6 +235,12 @@
 
     scene.add(new THREE.AmbientLight(0x04112a, 2));
 
+    // ── Per-section accent colors ─────────────────────────────────────
+    const SECTION_COLORS = [
+      0x00d4ff, 0x0088ff, 0x44ddaa, 0xff8833,
+      0xffbb00, 0xff44bb, 0xaa44ff, 0x00ffdd,
+    ];
+
     // ── Chrome torus ──────────────────────────────────────────────────
     const torusGeo = new THREE.TorusGeometry(9, 2.4, 128, 256);
     const torusMat = new THREE.MeshPhongMaterial({
@@ -267,12 +273,58 @@
     torusGroup.position.set(0, 0, 0);
     scene.add(torusGroup);
 
-    // ── Vertical light pillar ─────────────────────────────────────────
+    // ── Vertical light pillar (backbone) ─────────────────────────────
     const pillarMat = new THREE.MeshBasicMaterial({ color:0x00d4ff, transparent:true, opacity:0.18,
       blending:THREE.AdditiveBlending, depthWrite:false });
     const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 80, 8), pillarMat);
     pillar.position.set(0,0,0);
     scene.add(pillar);
+
+    // ── Per-section crystal shard columns ─────────────────────────────
+    // 18 OctahedronGeometry shards per section, orbiting + bobbing along pillar
+    const shardGroups = SECTION_COLORS.map((hex, si) => {
+      const group = new THREE.Group();
+      const col = new THREE.Color(hex);
+      for (let i = 0; i < 18; i++) {
+        const scale = 0.18 + Math.random() * 0.48;
+        const geo = new THREE.OctahedronGeometry(scale, 0);
+        const mat = new THREE.MeshPhongMaterial({
+          color: col.clone(), emissive: col.clone().multiplyScalar(0.25),
+          specular: new THREE.Color(0xffffff), shininess: 100,
+          transparent: true, opacity: 0, side: THREE.DoubleSide,
+        });
+        mat.userData.baseOp = 0.55 + Math.random() * 0.4;
+        const pAngle  = (i / 18) * Math.PI * 2;
+        const pHeight = 2 + (i / 17) * 13;
+        const pRadius = 0.3 + Math.random() * 1.6;
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(
+          Math.cos(pAngle) * pRadius,
+          pHeight,
+          Math.sin(pAngle) * pRadius - 1
+        );
+        mesh.userData = {
+          pAngle, pHeight, pRadius,
+          orbitSpeed: 0.12 + Math.random() * 0.22,
+          rotSpeed: new THREE.Vector3(
+            0.008 + Math.random() * 0.018,
+            0.012 + Math.random() * 0.018,
+            0.004 + Math.random() * 0.008
+          ),
+          bobPhase: Math.random() * Math.PI * 2,
+        };
+        group.add(mesh);
+      }
+      group.visible = false;
+      group.userData.fadeOp = 0;
+      scene.add(group);
+      return group;
+    });
+
+    // Section accent point light — shifts color per active section
+    const sectionLight = new THREE.PointLight(0x00d4ff, 0, 60);
+    sectionLight.position.set(0, -2, 2);
+    scene.add(sectionLight);
 
     // Equator rings
     const eqMeshes = [];
@@ -434,11 +486,20 @@
           child.material.opacity = child.material.userData.baseOp * torusVis;
         }
       });
-      pillarMat.opacity  = 0.18 * torusVis;
       eqMeshes.forEach(m => { m.material.opacity = 0.5 * torusVis; });
       torusGroup.visible = torusVis > 0.01;
-      pillar.visible     = torusVis > 0.01;
       eqMeshes.forEach(m => { m.visible = torusVis > 0.01; });
+
+      // Backbone pillar: follow torus fade on section 0, then persist as section column
+      if (introComplete) {
+        const pillarOp = scrollProgress < 1 ? torusVis * 0.18 : 0.28;
+        pillarMat.opacity = pillarOp;
+        pillarMat.color.setHex(SECTION_COLORS[currentSection]);
+        pillar.visible = true;
+      } else {
+        pillarMat.opacity = 0.18;
+        pillar.visible = true;
+      }
 
       // ── Torus rotation from scroll ─────────────────────────────────
       _currentRotY += (_targetRotY - _currentRotY) * 0.06;
@@ -465,6 +526,30 @@
         if (posArr[i*3+1] < -45) posArr[i*3+1] =  45;
       }
       partGeo.attributes.position.needsUpdate = true;
+
+      // ── Per-section shard column animation ────────────────────────────
+      shardGroups.forEach((group, si) => {
+        const target = (si === currentSection && introComplete) ? 1 : 0;
+        group.userData.fadeOp += (target - group.userData.fadeOp) * 0.04;
+        const fo = group.userData.fadeOp;
+        group.visible = fo > 0.005;
+        if (!group.visible) return;
+        group.children.forEach(mesh => {
+          const d = mesh.userData;
+          d.pAngle += d.orbitSpeed * 0.01;
+          mesh.position.x = Math.cos(d.pAngle) * d.pRadius;
+          mesh.position.z = Math.sin(d.pAngle) * d.pRadius - 1;
+          mesh.position.y = d.pHeight + Math.sin(t * 0.5 + d.bobPhase) * 0.5;
+          mesh.rotation.x += d.rotSpeed.x;
+          mesh.rotation.y += d.rotSpeed.y;
+          mesh.rotation.z += d.rotSpeed.z;
+          mesh.material.opacity = mesh.material.userData.baseOp * fo;
+        });
+      });
+
+      // Section accent light: shift color per section
+      sectionLight.color.setHex(SECTION_COLORS[currentSection]);
+      sectionLight.intensity = introComplete ? 5 : 0;
 
       // Subtle camera drift after intro settles
       if (introComplete) {

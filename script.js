@@ -238,10 +238,22 @@
 
     scene.add(new THREE.AmbientLight(0x04112a, 2));
 
-    // ── Per-section accent colors ─────────────────────────────────────
+    // ── Per-section accent colors (for shards, pillar, light) ────────
     const SECTION_COLORS = [
       0x00d4ff, 0x0088ff, 0x44ddaa, 0xff8833,
       0xffbb00, 0xff44bb, 0xaa44ff, 0x00ffdd,
+    ];
+
+    // ── Per-section scene background colors ──────────────────────────
+    const BG_COLORS = [
+      new THREE.Color(0x000810), // IDENTITY:      deep navy
+      new THREE.Color(0x001408), // PROFILE:       deep forest
+      new THREE.Color(0x080418), // CAPABILITIES:  deep violet
+      new THREE.Color(0x120600), // ARCHIVE:       deep amber
+      new THREE.Color(0x160005), // TIMELINE:      deep crimson
+      new THREE.Color(0x001410), // TRANSMISSIONS: deep teal
+      new THREE.Color(0x060012), // CREDENTIALS:   deep indigo
+      new THREE.Color(0x001c1c), // INTERFACE:     deep cyan
     ];
 
     // ── Chrome torus ──────────────────────────────────────────────────
@@ -431,14 +443,15 @@
         const explodeStrength = Math.max(0,
           Math.sin(Math.PI * Math.max(0, Math.min(1, (p - 0.55) / 0.35)))
         );
+        // Strong explosion — fills screen like reference (5x particle push)
         for (let i=0; i<N; i++) {
-          posArr[i*3]   += pev[i*3]   * explodeStrength;
-          posArr[i*3+1] += pev[i*3+1] * explodeStrength;
-          posArr[i*3+2] += pev[i*3+2] * explodeStrength;
+          posArr[i*3]   += pev[i*3]   * explodeStrength * 5;
+          posArr[i*3+1] += pev[i*3+1] * explodeStrength * 5;
+          posArr[i*3+2] += pev[i*3+2] * explodeStrength * 5;
         }
-
-        // Flash light burst at peak explosion (p≈0.75)
-        flashLight.intensity = explodeStrength * 18;
+        // Blinding flash at peak
+        flashLight.intensity = explodeStrength * 90;
+        partMat.size = 1.5 + explodeStrength * 4;
 
         // Fade out the boot overlay as explosion peaks (p=0.72), then
         // remove it after fade completes
@@ -461,59 +474,48 @@
         }
       }
 
-      // ── Helix / screw card motion ─────────────────────────────────────
-      // Cards rise vertically while spinning around Y — like a screw being
-      // unscrewed upward. Active card faces front; past/future recede.
+      // ── Horizontal card slide — two cards flanking the 3D column ─────
+      // Active card sits left-of-center; next card is right-of-center.
+      // The 3D column renders in the gap between them (~47–53vw).
       smoothScroll += (scrollProgress - smoothScroll) * 0.07;
 
       if (introComplete) {
+        // Each card slot is 50vw wide. Active card anchored at 3vw from left.
         sections.forEach((s, i) => {
-          const delta    = smoothScroll - i;
-          const absDelta = Math.abs(delta);
-          // Sharp opacity peak: fully visible only near delta=0,
-          // gone by delta=±0.55 so only ONE card is ever prominent.
-          // Use squared dropoff for a clean bell curve peak.
-          const op  = Math.max(0, 1 - Math.pow(absDelta * 1.9, 2));
-          // Vertical rise: past cards float upward, upcoming wait below
-          const ty  = delta * -130;
-          // Screw spin around Y — 48° per section gives clear helical feel
-          const ry  = delta * -48;
-          // Slight X tilt for depth (receding cards tip away)
-          const rx  = delta * 9;
-          // Z depth: recede quadratically so it looks like depth, not just blur
-          const tz  = -(absDelta * absDelta) * 70;
-          // Scale down as they recede
-          const scl = Math.max(0.72, 1 - absDelta * 0.14);
-
-          s.style.opacity   = op;
-          s.style.transform = `translateY(${ty}px) translateZ(${tz}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${scl})`;
-          s.style.pointerEvents = absDelta < 0.4 ? 'auto' : 'none';
+          const offset   = 3 + (i - smoothScroll) * 50; // vw from left
+          const absDelta = Math.abs(i - smoothScroll);
+          // Gentle opacity — both left+right cards visible during transition
+          const op = Math.max(0, 1 - absDelta * 1.1);
+          s.style.opacity       = op;
+          s.style.transform     = `translateY(-50%) translateX(${offset}vw)`;
+          s.style.pointerEvents = absDelta < 0.45 ? 'auto' : 'none';
         });
       }
 
-      // ── Torus scroll-driven fade: visible at section 0, gone by section 1 ──
-      // scrollProgress=0 → opacity 1, scrollProgress=1 → opacity 0
+      // ── Scene background floods with section color ─────────────────────
+      if (introComplete) {
+        const si  = Math.min(Math.floor(smoothScroll), SECTION_COUNT - 2);
+        const sf  = Math.max(0, Math.min(1, smoothScroll - si));
+        const bgC = BG_COLORS[si].clone().lerp(BG_COLORS[si + 1], sf);
+        renderer.setClearColor(bgC);
+        scene.fog.color.copy(bgC);
+      }
+
+      // ── Torus: visible only during intro (section 0), fades by section 1 ─
       const torusVis = introComplete ? Math.max(0, 1 - scrollProgress) : 1;
       torusMat.opacity = torusVis;
       torus.children.forEach(child => {
-        if (child.material && child.material.userData.baseOp !== undefined) {
+        if (child.material && child.material.userData.baseOp !== undefined)
           child.material.opacity = child.material.userData.baseOp * torusVis;
-        }
       });
       eqMeshes.forEach(m => { m.material.opacity = 0.5 * torusVis; });
       torusGroup.visible = torusVis > 0.01;
       eqMeshes.forEach(m => { m.visible = torusVis > 0.01; });
 
-      // Backbone pillar: follow torus fade on section 0, then persist as section column
-      if (introComplete) {
-        const pillarOp = scrollProgress < 1 ? torusVis * 0.18 : 0.28;
-        pillarMat.opacity = pillarOp;
-        pillarMat.color.setHex(SECTION_COLORS[currentSection]);
-        pillar.visible = true;
-      } else {
-        pillarMat.opacity = 0.18;
-        pillar.visible = true;
-      }
+      // ── Backbone pillar — always visible after intro, colored per section ─
+      pillarMat.color.setHex(SECTION_COLORS[currentSection]);
+      pillarMat.opacity = introComplete ? 0.38 : torusVis * 0.18;
+      pillar.visible    = true;
 
       // ── Torus rotation from scroll ─────────────────────────────────
       _currentRotY += (_targetRotY - _currentRotY) * 0.06;
@@ -541,10 +543,12 @@
       }
       partGeo.attributes.position.needsUpdate = true;
 
-      // ── Per-section shard column animation ────────────────────────────
+      // ── Per-section shard column — fades between adjacent sections ───
       shardGroups.forEach((group, si) => {
-        const target = (si === currentSection && introComplete) ? 1 : 0;
-        group.userData.fadeOp += (target - group.userData.fadeOp) * 0.04;
+        // Show shards for any section within 1 step of smoothScroll
+        const dist   = Math.abs(smoothScroll - si);
+        const target = introComplete ? Math.max(0, 1 - dist * 1.4) : 0;
+        group.userData.fadeOp += (target - group.userData.fadeOp) * 0.06;
         const fo = group.userData.fadeOp;
         group.visible = fo > 0.005;
         if (!group.visible) return;

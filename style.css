@@ -139,43 +139,42 @@ body {
 }
 .dot:hover { background: var(--cyan-dim); }
 
-/* ── Content panel — centered, perspective container for 3D screw motion */
+/* ── Content panel — full-screen canvas for horizontal card layout ── */
 #content-panel {
   position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translateX(-50%) translateY(-50%);
-  width: min(540px, 88vw);
+  inset: 0;
   z-index: 20;
   pointer-events: none;
-  perspective: 1100px;
-  perspective-origin: 50% 50%;
 }
 
-/* Each section card — JS drives helix transform (translateY + rotateY + tz) */
+/* Cards: 44vw wide, slide horizontally — JS drives translateX ──────── */
 .sec {
   position: absolute;
-  top: 0;
+  width: 44vw;
+  max-width: 600px;
+  top: 50%;
   left: 0;
-  width: 100%;
   opacity: 0;
   will-change: transform, opacity;
   pointer-events: none;
-  /* Glassmorphism — readable but translucent */
-  background: rgba(0, 8, 20, 0.52);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(0, 212, 255, 0.20);
+  /* Glassmorphism */
+  background: rgba(2, 10, 24, 0.60);
+  backdrop-filter: blur(26px) saturate(170%);
+  -webkit-backdrop-filter: blur(26px) saturate(170%);
+  border: 1px solid rgba(0, 212, 255, 0.18);
   border-top: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 20px;
-  padding: 2.6rem 3rem;
+  border-radius: 18px;
+  padding: 2.4rem 2.8rem;
   box-shadow:
-    0 0 50px rgba(0, 212, 255, 0.07),
-    0 24px 64px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(0, 212, 255, 0.07),
+    0 20px 60px rgba(0, 0, 0, 0.6),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
-.sec.active {
-  pointer-events: auto;
+.sec.active { pointer-events: auto; }
+
+/* Mobile: stack cards full-width */
+@media (max-width: 768px) {
+  .sec { width: 88vw; max-width: none; }
 }
 
 /* ── Staggered child reveals when section becomes active ─────────── */

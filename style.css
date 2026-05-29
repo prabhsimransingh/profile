@@ -195,7 +195,14 @@ body {
 }
 
 @media (max-width: 768px) {
-  .sec { width: 86vw; left: 7vw; max-width: none; }
+  .sec {
+    width: 86vw;
+    left: 7vw;
+    max-width: none;
+    max-height: 82vh;
+    overflow-y: auto;
+    padding: 1.6rem 1.8rem;
+  }
   #column-spine { display: none; }
 }
 

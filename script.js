@@ -430,8 +430,7 @@
 
     function loop(timestamp) {
       // Use real elapsed time so intro speed is frame-rate independent
-      if (!_lastTime) _lastTime = timestamp;
-      const dt = Math.min((timestamp - _lastTime) / 1000, 0.05); // seconds, capped at 50ms
+      const dt = _lastTime ? Math.min((timestamp - _lastTime) / 1000, 0.05) : 0;
       _lastTime = timestamp;
       t += dt * 0.5; // ~0.008 at 60fps equivalent
 
@@ -621,7 +620,7 @@
       requestAnimationFrame(loop);
     }
 
-    loop();
+    requestAnimationFrame(loop); // always call via RAF so timestamp is valid
   })();
 
 })();

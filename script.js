@@ -244,16 +244,16 @@
       0xffbb00, 0xff44bb, 0xaa44ff, 0x00ffdd,
     ];
 
-    // ── Per-section scene background colors (richer, not pure black) ─
+    // ── Per-section scene background colors (vivid, immersive) ─
     const BG_COLORS = [
-      new THREE.Color(0x001428), // IDENTITY:      rich navy
-      new THREE.Color(0x00200e), // PROFILE:       rich forest
-      new THREE.Color(0x100638), // CAPABILITIES:  rich violet
-      new THREE.Color(0x280e00), // ARCHIVE:       rich amber
-      new THREE.Color(0x2a000c), // TIMELINE:      rich crimson
-      new THREE.Color(0x00201c), // TRANSMISSIONS: rich teal
-      new THREE.Color(0x0e0030), // CREDENTIALS:   rich indigo
-      new THREE.Color(0x003030), // INTERFACE:     rich cyan
+      new THREE.Color(0x00285a), // IDENTITY:      deep navy
+      new THREE.Color(0x004020), // PROFILE:       deep forest
+      new THREE.Color(0x200870), // CAPABILITIES:  deep violet
+      new THREE.Color(0x582000), // ARCHIVE:       deep amber
+      new THREE.Color(0x550020), // TIMELINE:      deep crimson
+      new THREE.Color(0x004038), // TRANSMISSIONS: deep teal
+      new THREE.Color(0x1a0068), // CREDENTIALS:   deep indigo
+      new THREE.Color(0x006060), // INTERFACE:     deep cyan
     ];
 
     // ── Chrome torus ──────────────────────────────────────────────────
@@ -291,7 +291,7 @@
     // ── Vertical light pillar (backbone) ─────────────────────────────
     const pillarMat = new THREE.MeshBasicMaterial({ color:0x00d4ff, transparent:true, opacity:0.18,
       blending:THREE.AdditiveBlending, depthWrite:false });
-    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 80, 8), pillarMat);
+    const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 80, 8), pillarMat);
     pillar.position.set(0,0,0);
     scene.add(pillar);
 
@@ -425,14 +425,19 @@
 
     // ── Render loop ───────────────────────────────────────────────────
     let t=0;
+    let _lastTime = 0;
     const posArr = partGeo.attributes.position.array;
 
-    function loop() {
-      t += 0.008;
+    function loop(timestamp) {
+      // Use real elapsed time so intro speed is frame-rate independent
+      if (!_lastTime) _lastTime = timestamp;
+      const dt = Math.min((timestamp - _lastTime) / 1000, 0.05); // seconds, capped at 50ms
+      _lastTime = timestamp;
+      t += dt * 0.5; // ~0.008 at 60fps equivalent
 
       // ── Camera fly-in intro ───────────────────────────────────────
       if (!introComplete) {
-        introT += 0.016;
+        introT += dt;
         const p  = Math.min(1, introT / INTRO_DUR);
         // ease-in-out: camera accelerates then decelerates into position
         const e  = p < 0.5 ? 2*p*p : 1 - Math.pow(-2*p+2, 2)/2;
@@ -482,34 +487,51 @@
       smoothScroll += (scrollProgress - smoothScroll) * 0.07;
 
       if (introComplete) {
-        // Orbit radius = distance from card center to column center.
-        // Column is at ~50vw, card center at ~3vw + 22vw = 25vw.
-        // On a 1440px screen: (0.50 - 0.25) * 1440 ≈ 360px.
-        const ORBIT_R = Math.round(window.innerWidth * 0.25);
+        const iW = window.innerWidth;
+        const isMobile = iW <= 768;
 
-        sections.forEach((s, i) => {
-          const delta = smoothScroll - i;
-          // 90° of Y-axis orbit per section — card is fully edge-on (invisible) at ±1
-          const angle = delta * (Math.PI / 2);
+        if (isMobile) {
+          // Mobile: clean vertical fade — no orbit, just stacked crossfade
+          sections.forEach((s, i) => {
+            const delta = i - smoothScroll;
+            const op = Math.max(0, Math.cos(Math.min(Math.abs(delta), 1) * Math.PI / 2));
+            const ty = delta * 40;
+            s.style.opacity       = op;
+            s.style.transform     = `translateY(calc(-50% + ${ty}px))`;
+            s.style.pointerEvents = Math.abs(delta) < 0.42 ? 'auto' : 'none';
+          });
+        } else {
+          // Desktop: true Y-axis orbit — active card LEFT of column,
+          // incoming card arrives from RIGHT of column (like reference video).
+          //
+          // delta = i - smoothScroll  (KEY: positive delta = future card = right side)
+          //   delta=0  → active, left panel (centre 25vw, spans 6–44vw)
+          //   delta=+1 → incoming, right panel (centre 60vw, spans 41–79vw)
+          //   delta=-1 → past, exits left (off-screen)
+          const ACTIVE_CX = iW * 0.25;          // px: active card centre x
+          const ORBIT_R   = iW * 0.35;          // px: arc radius
+          const HALF_W    = Math.min(iW * 0.19, 280); // px: half of 38vw card width
 
-          // X: card sweeps right as angle increases (past cards exit right)
-          const tx = Math.sin(angle) * ORBIT_R;
-          // Z: card recedes behind column as it orbits to the side
-          const tz = (Math.cos(angle) - 1) * ORBIT_R;
-          // Y: slight helix rise as card orbits (makes motion feel 3-dimensional)
-          const ty = delta * -35;
-          // Y-rotation: card face tracks the orbit so it stays readable while turning
-          const ry = angle * (180 / Math.PI);
+          sections.forEach((s, i) => {
+            // Invert delta so PAST cards exit LEFT, FUTURE cards enter from RIGHT
+            const delta = i - smoothScroll;
+            const angle = delta * (Math.PI / 2); // 90° per section
 
-          // Opacity: clamp by DELTA distance (not orbit angle) so sections
-          // that complete a full orbit never reappear at the front position.
-          // Visible only within ±1 section of active — gone completely at ±1.
-          const op = Math.max(0, 1 - Math.abs(delta) * 1.25);
+            // Card centre sweeps along sin arc: right → left panel → off-screen left
+            const cx = ACTIVE_CX + Math.sin(angle) * ORBIT_R;
+            const tx = cx - HALF_W;                             // left edge
+            const ty = delta * 45;                              // past cards drop slightly
+            const tz = (Math.cos(angle) - 1) * ORBIT_R * 0.6; // recede behind column
+            const ry = angle * (180 / Math.PI);                 // face tracks orbit
 
-          s.style.opacity       = op;
-          s.style.transform     = `perspective(1100px) translateX(${tx}px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateY(${ry}deg)`;
-          s.style.pointerEvents = Math.abs(delta) < 0.38 ? 'auto' : 'none';
-        });
+            // Cosine opacity — smooth crossfade; 3D rotateY hides overlap at midpoint
+            const op = Math.max(0, Math.cos(Math.min(Math.abs(delta), 1) * Math.PI / 2));
+
+            s.style.opacity       = op;
+            s.style.transform     = `perspective(1200px) translateX(${tx}px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateY(${ry}deg)`;
+            s.style.pointerEvents = Math.abs(delta) < 0.42 ? 'auto' : 'none';
+          });
+        }
       }
 
       // ── Scene background floods with section color ─────────────────────
@@ -534,7 +556,7 @@
 
       // ── Backbone pillar — always visible after intro, colored per section ─
       pillarMat.color.setHex(SECTION_COLORS[currentSection]);
-      pillarMat.opacity = introComplete ? 0.38 : torusVis * 0.18;
+      pillarMat.opacity = introComplete ? 0.70 : torusVis * 0.18;
       pillar.visible    = true;
 
       // ── Torus rotation from scroll ─────────────────────────────────
@@ -574,13 +596,13 @@
         if (!group.visible) return;
         group.children.forEach(mesh => {
           const d = mesh.userData;
-          d.pAngle += d.orbitSpeed * 0.01;
+          d.pAngle += d.orbitSpeed * dt;
           mesh.position.x = Math.cos(d.pAngle) * d.pRadius;
           mesh.position.z = Math.sin(d.pAngle) * d.pRadius - 1;
           mesh.position.y = d.pHeight + Math.sin(t * 0.5 + d.bobPhase) * 0.5;
-          mesh.rotation.x += d.rotSpeed.x;
-          mesh.rotation.y += d.rotSpeed.y;
-          mesh.rotation.z += d.rotSpeed.z;
+          mesh.rotation.x += d.rotSpeed.x * dt * 60;
+          mesh.rotation.y += d.rotSpeed.y * dt * 60;
+          mesh.rotation.z += d.rotSpeed.z * dt * 60;
           mesh.material.opacity = mesh.material.userData.baseOp * fo;
         });
       });

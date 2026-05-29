@@ -147,35 +147,56 @@ body {
   pointer-events: none;
 }
 
-/* Cards: fixed left of column — JS drives vertical drum rotation ──── */
+/* Cards: orbit around centred column — JS sets translateX per frame ── */
 .sec {
   position: absolute;
-  width: 44vw;
-  max-width: 600px;
+  width: 38vw;
+  max-width: 560px;
   top: 50%;
-  left: 3vw;
+  left: 0;                   /* JS translateX drives all horizontal placement */
   opacity: 0;
   will-change: transform, opacity;
   pointer-events: none;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   /* Glassmorphism */
-  background: rgba(2, 10, 24, 0.58);
-  backdrop-filter: blur(26px) saturate(170%);
-  -webkit-backdrop-filter: blur(26px) saturate(170%);
-  border: 1px solid rgba(0, 212, 255, 0.18);
-  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(2, 10, 24, 0.62);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 18px;
   padding: 2.4rem 2.8rem;
   box-shadow:
-    0 0 40px rgba(0, 212, 255, 0.08),
-    0 20px 60px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 0 50px rgba(0, 212, 255, 0.10),
+    0 20px 60px rgba(0, 0, 0, 0.60),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 .sec.active { pointer-events: auto; }
 
+/* Visual column spine — anchors the 3D pillar in CSS space */
+#column-spine {
+  position: fixed;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 212, 255, 0.20) 15%,
+    rgba(0, 212, 255, 0.30) 50%,
+    rgba(0, 212, 255, 0.20) 85%,
+    transparent 100%
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
 @media (max-width: 768px) {
-  .sec { width: 90vw; left: 5vw; max-width: none; }
+  .sec { width: 86vw; left: 7vw; max-width: none; }
+  #column-spine { display: none; }
 }
 
 /* ── Staggered child reveals when section becomes active ─────────── */

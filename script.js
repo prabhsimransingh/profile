@@ -500,31 +500,51 @@
             s.style.pointerEvents = Math.abs(delta) < 0.42 ? 'auto' : 'none';
           });
         } else {
-          // Desktop: true Y-axis orbit — active card LEFT of column,
-          // incoming card arrives from RIGHT of column (like reference video).
+          // Desktop: Y-axis orbit — two-panel layout like reference video.
           //
-          // delta = i - smoothScroll  (KEY: positive delta = future card = right side)
-          //   delta=0  → active, left panel (centre 25vw, spans 6–44vw)
-          //   delta=+1 → incoming, right panel (centre 60vw, spans 41–79vw)
-          //   delta=-1 → past, exits left (off-screen)
-          const ACTIVE_CX = iW * 0.25;          // px: active card centre x
-          const ORBIT_R   = iW * 0.35;          // px: arc radius
+          // Geometry at rest (stable section):
+          //   Active card  (delta=0): left panel  6–44vw, face-on, full opacity
+          //   Preview card (delta=1): right panel 51–89vw, 60° angled, ghosted (18% op)
+          //   Column spine sits in the 44–51vw gap between the two panels.
+          //
+          // On scroll: preview card sweeps from right panel through column to left panel.
+          // Past cards exit LEFT and vanish — they never ghost on the right.
+          //
+          // ORBIT_R = 52vw ensures preview left-edge > 50vw (right of column):
+          //   delta=1: cx = 25 + 52×sin60° = 25+45 = 70vw → left edge 51vw ✓
+          //
+          // Angle = 60°/section (not 90°) so the preview card is still partially
+          // face-on and readable as a ghost, not fully edge-on.
+          const ACTIVE_CX = iW * 0.25;           // px: active card centre x
+          const ORBIT_R   = iW * 0.52;           // px: arc (52vw keeps preview right of column)
           const HALF_W    = Math.min(iW * 0.19, 280); // px: half of 38vw card width
 
           sections.forEach((s, i) => {
-            // Invert delta so PAST cards exit LEFT, FUTURE cards enter from RIGHT
-            const delta = i - smoothScroll;
-            const angle = delta * (Math.PI / 2); // 90° per section
+            const delta = i - smoothScroll; // +ve = future (right), -ve = past (left)
+            const angle = delta * (Math.PI / 3); // 60° per section
 
-            // Card centre sweeps along sin arc: right → left panel → off-screen left
             const cx = ACTIVE_CX + Math.sin(angle) * ORBIT_R;
-            const tx = cx - HALF_W;                             // left edge
-            const ty = delta * 45;                              // past cards drop slightly
-            const tz = (Math.cos(angle) - 1) * ORBIT_R * 0.6; // recede behind column
-            const ry = angle * (180 / Math.PI);                 // face tracks orbit
+            const tx = cx - HALF_W;
+            const ty = delta * 30;
+            const tz = (Math.cos(angle) - 1) * ORBIT_R * 0.45;
+            const ry = angle * (180 / Math.PI);
 
-            // Cosine opacity — smooth crossfade; 3D rotateY hides overlap at midpoint
-            const op = Math.max(0, Math.cos(Math.min(Math.abs(delta), 1) * Math.PI / 2));
+            // Asymmetric opacity:
+            //   Upcoming cards ghost at 0.18 so the right panel always shows a preview.
+            //   Past cards fade to 0 so they vanish cleanly as they exit left.
+            let op;
+            if (delta > 2 || delta < -1) {
+              op = 0;
+            } else if (delta >= 0 && delta <= 1) {
+              // Active→preview: cosine from 1 → 0, clamped at 0.18 minimum
+              op = Math.max(0.18, Math.cos(delta * Math.PI / 2));
+            } else if (delta > 1) {
+              // Cards 2+ ahead: fade ghost out from 0.18 → 0
+              op = 0.18 * (2 - delta);
+            } else {
+              // Exiting left (delta -1 → 0): cosine fade 0 → 1
+              op = Math.max(0, Math.cos(-delta * Math.PI / 2));
+            }
 
             s.style.opacity       = op;
             s.style.transform     = `perspective(1200px) translateX(${tx}px) translateY(calc(-50% + ${ty}px)) translateZ(${tz}px) rotateY(${ry}deg)`;

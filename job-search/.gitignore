@@ -1,0 +1,6 @@
+*.pdf
+*.docx
+resume*
+.env
+.pinloop/
+node_modules/
